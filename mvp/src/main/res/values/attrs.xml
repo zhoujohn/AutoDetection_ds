@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CommonTopBar">
+        <attr name="titleCenter" format="string" />
+        <attr name="leftImageRes" format="reference" />
+        <attr name="rightImageRes" format="reference" />
+        <attr name="rightImageRes2" format="reference" />
+        <attr name="rightTxt" format="string" />
+        <attr name="isShowLeft" format="boolean" />
+        <attr name="isShowLeftPoint" format="boolean" />
+        <attr name="rightTxtColor" format="color" />
+        <attr name="isShowBottomLine" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="CommonLoadingView">
+        <attr name="isShowBackBgLoading" format="boolean" />
+        <attr name="isShowBackBgError" format="boolean" />
+        <attr name="isShowBackBgEmpty" format="boolean" />
+        <attr name="loadEmptyType" format="integer" />
+        <attr name="loadEmptyLayoutKey" format="integer" />
+        <attr name="minHeightPer" format="float" />
+    </declare-styleable>
+
+</resources>

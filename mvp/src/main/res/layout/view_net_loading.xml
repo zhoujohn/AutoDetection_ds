@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/loadCon"
+    style="@style/fill_fill">
+
+    <com.common.mvplib.widget.loadingview.ViewLoading
+        android:id="@+id/vLoading"
+        style="@style/fill_fill"
+        android:visibility="gone" />
+
+    <com.common.mvplib.widget.loadingview.ViewError
+        android:id="@+id/vError"
+        style="@style/fill_fill"
+        android:visibility="gone" />
+
+</RelativeLayout>

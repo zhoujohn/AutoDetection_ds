@@ -1,0 +1,100 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+    defaultConfig {
+        applicationId "com.frt.autodetection"
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        //多渠道打包版本号
+        flavorDimensions "1.0.0"
+
+        //解决引用多个Libs
+        multiDexEnabled true
+        //dataBinding
+        dataBinding {
+            enabled = true
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [moduleName: project.getName()]
+            }
+        }
+        externalNativeBuild {
+            cmake {
+                cppFlags "-frtti -fexceptions"
+                abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+            }
+        }
+        //jni start
+        ndk {
+            moduleName "JniLib"
+//            abiFilters 'armeabi', 'armeabi-v7a' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
+        sourceSets.main {
+            jni.srcDirs = []
+            jniLibs.srcDir "src/main/libs"
+        }
+        //jni end
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs/OpenCV-android-sdk/sdk/native/libs']
+        }
+    }
+    signingConfigs {
+        release {
+            keyAlias 'travelshop'
+            keyPassword '123456'
+            storeFile file('./travelshop.jks')
+            storePassword '123456'
+        }
+
+    }
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            zipAlignEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':mvp')
+    implementation project(':baselib')
+    implementation project(':openCVLibrary')
+
+    implementation rootProject.ext.dependencies["constraintlayout"]
+    implementation rootProject.ext.dependencies["appcompat-v7"]
+    implementation rootProject.ext.dependencies["cardview-v7"]
+    implementation rootProject.ext.dependencies["design"]
+
+    //屏幕适配
+    implementation rootProject.ext.dependencies["autosize"]
+}

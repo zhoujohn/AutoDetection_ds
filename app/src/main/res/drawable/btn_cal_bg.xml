@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle"
+       android:useLevel="true">
+
+
+    <!-- 圆角半径是高度的一般就是一个圆弧了 -->
+    <corners android:topRightRadius="10dp"/>
+    <gradient
+        android:angle="270"
+        android:endColor="#00365e"
+        android:startColor="#005678"/>
+</shape>

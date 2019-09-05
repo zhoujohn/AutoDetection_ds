@@ -1,0 +1,49 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':baselib')
+
+    //support
+    api(rootProject.ext.dependencies["support-v4"]) {
+        exclude module: 'support-annotations'
+    }
+    api(rootProject.ext.dependencies["appcompat-v7"]) {
+        exclude module: 'support-annotations'
+    }
+    //侧滑
+    api rootProject.ext.dependencies["swipebacklayout"]
+    //状态栏
+    api rootProject.ext.dependencies["immersionbar"]
+    api rootProject.ext.dependencies["immersionbar-components"]
+
+}

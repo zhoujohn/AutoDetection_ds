@@ -1,0 +1,131 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+
+    <dimen name="height_top_bar">60dp</dimen>
+
+
+    <dimen name="ts_44">24sp</dimen>
+    <dimen name="ts_42">23sp</dimen>
+    <dimen name="ts_40">22sp</dimen>
+    <dimen name="ts_38">21sp</dimen>
+    <dimen name="ts_36">20sp</dimen>
+    <dimen name="ts_34">19sp</dimen>
+    <dimen name="ts_32">18sp</dimen>
+    <dimen name="ts_30">17sp</dimen>
+    <dimen name="ts_28">16sp</dimen>
+    <dimen name="ts_26">15sp</dimen>
+    <dimen name="ts_24">14sp</dimen>
+    <dimen name="ts_22">13sp</dimen>
+    <dimen name="ts_20">12sp</dimen>
+    <dimen name="ts_18">11sp</dimen>
+    <dimen name="ts_16">10sp</dimen>
+    <dimen name="ts_14">9sp</dimen>
+    <dimen name="ts_12">8sp</dimen>
+
+    <dimen name="post_media_height">200dp</dimen>
+
+    <dimen name="seek_bar_image">150dp</dimen>
+
+    <dimen name="video_play_icon_width">55dp</dimen>
+
+    <dimen name="common_paddingV">10dp</dimen>
+    <dimen name="common_paddingH">15dp</dimen>
+    <dimen name="common_paddingV8">8dp</dimen>
+    <dimen name="common_paddingV7">7dp</dimen>
+    <dimen name="common_paddingV5">5dp</dimen>
+    <dimen name="common_paddingV3">3dp</dimen>
+    <dimen name="common_paddingV2">2dp</dimen>
+
+    <dimen name="avater_width">50dp</dimen>
+    <dimen name="avater_width_small">40dp</dimen>
+    <dimen name="avater_width_big">60dp</dimen>
+    <dimen name="comment_left">70dp</dimen>
+
+
+    <dimen name="common_bottom_nav_bar_ts">10sp</dimen>
+    <dimen name="btn_conner">5dip</dimen>
+    <dimen name="common_bottom_nav_bar_icon_height">28dp</dimen>
+    <dimen name="common_bottom_nav_bar_dian">8dp</dimen>
+
+    <dimen name="login_leftPadding">15dp</dimen>
+
+    <dimen name="login_edit_height">48dp</dimen>
+    <dimen name="act_regist_pengsi_left_tv_width">90dp</dimen>
+    <dimen name="default_line_height">1px</dimen>
+    <dimen name="login_bt_height">45dp</dimen>
+    <dimen name="login_qq_icon_width">60dp</dimen>
+
+    <!--Crop View-->
+    <dimen name="ucrop_default_crop_grid_stoke_width">1dp</dimen>
+    <dimen name="ucrop_default_crop_frame_stoke_width">1dp</dimen>
+
+
+    <dimen name="indicator_right_padding">10dp</dimen>
+    <dimen name="indicator_corner_radius">12dp</dimen>
+    <dimen name="indicator_internal_padding">4dp</dimen>
+    <dimen name="header_footer_left_right_padding">24dp</dimen>
+    <dimen name="header_footer_top_bottom_padding">12dp</dimen>
+
+    <dimen name="tag_corner_radius">20dip</dimen>
+    <dimen name="ptr_loading_width">20dp</dimen>
+    <dimen name="pstsIndicatorWidth">120dp</dimen>
+    <dimen name="all_popup_width">280dp</dimen>
+    <!--上面wdf  下面txs-->
+    <dimen name="small_size">12sp</dimen>
+    <dimen name="normal_size">14sp</dimen>
+    <dimen name="big_size">17sp</dimen>
+    <dimen name="bigger_size">20sp</dimen>
+    <dimen name="mine_all_text_size">15sp</dimen>
+    <dimen name="all_padding_left">15dp</dimen>
+    <dimen name="me_left_icon">20dp</dimen>
+    <dimen name="share_qq_icon_width">50dp</dimen>
+    <!--jc start-->
+    <dimen name="jc_start_button_w_h_normal">45dp</dimen>
+    <dimen name="jc_start_button_w_h_fullscreen">62dp</dimen>
+    <dimen name="recall_dimen">8dp</dimen>
+    <dimen name="recall_dimen_bg">2dp</dimen>
+    <dimen name="recall_dimen_4">4dp</dimen>
+    <dimen name="recall_dimen_256">256dp</dimen>
+    <dimen name="recall_size_12">12sp</dimen>
+    <dimen name="recall_size_8">8sp</dimen>
+    <!--jc end-->
+    <!--高德导航start-->
+    <dimen name="navibar_text_size">14sp</dimen>
+    <dimen name="navibar_margin_right">25dp</dimen>
+    <dimen name="navibar_margin_left">25dp</dimen>
+    <dimen name="navibar_margin_method">30dp</dimen>
+    <dimen name="navibar_start_left">40dp</dimen>
+    <dimen name="start_content_font_size">18sp</dimen>
+    <dimen name="navibar_margin_top">15dp</dimen>
+    <dimen name="navibar_edit_height">35dp</dimen>
+    <dimen name="navibar_button_height">40dp</dimen>
+    <dimen name="naviroute_navi_height">45dp</dimen>
+    <dimen name="navisetting_margin_bottom">5dp</dimen>
+    <dimen name="navisetting_subtext_size">20sp</dimen>
+    <dimen name="titletext_size">18sp</dimen>
+    <dimen name="margin_right">5dp</dimen>
+    <dimen name="margin_left">5dp</dimen>
+    <dimen name="margin_top">5dp</dimen>
+    <dimen name="margin_bottom">5dp</dimen>
+    <dimen name="setting_margin_top">10dp</dimen>
+    <dimen name="setting_margin_bottom">10dp</dimen>
+
+    <dimen name="route_text_size">20sp</dimen>
+
+    <dimen name="guide_filling">10dp</dimen>
+    <dimen name="guide_group_name_text_size">18sp</dimen>
+    <dimen name="guide_detail_text_size">16sp</dimen>
+    <dimen name="guide_group_icon_size">18dp</dimen>
+    <dimen name="guide_child_icon_size">16dp</dimen>
+
+    <dimen name="text_size_mid">14sp</dimen>
+    <dimen name="text_size_normal">16sp</dimen>
+    <dimen name="text_size_big">18sp</dimen>
+    <!--高德导航end-->
+    <dimen name="coupon_margain_bottom">63dp</dimen>
+    <dimen name="common_indicator_width2">70dp</dimen>
+
+    <dimen name="default_corner_radius">4dp</dimen>
+    <dimen name="default_shadow_radius">4dp</dimen>
+    <dimen name="hmm_conner">5dp</dimen>
+</resources>

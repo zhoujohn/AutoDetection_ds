@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.common.baselib.widget.KeyboardLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/baseCon"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/common_page_bg">
+
+    <com.common.mvplib.widget.CommonTopBar
+        android:id="@+id/commonTopBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/ll_cons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/commonTopBar"
+        android:orientation="vertical" />
+
+    <com.common.mvplib.widget.loadingview.CommonLoadingView
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/commonTopBar" />
+
+
+</com.common.baselib.widget.KeyboardLayout>
