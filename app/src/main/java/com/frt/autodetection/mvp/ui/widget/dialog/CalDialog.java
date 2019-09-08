@@ -51,6 +51,7 @@ public final class CalDialog {
                     mIvCalType1.setImageResource(R.mipmap.dialog_btn_zhuibian_selected);
                     mIvCalType2.setImageResource(R.mipmap.dialog_btn_zhuixian_normal);
                     type = 1;
+                    mListener.onConfirm(getDialog(), type);
                 }
             });
 
@@ -63,6 +64,7 @@ public final class CalDialog {
                     mIvCalType1.setImageResource(R.mipmap.dialog_btn_zhuibian_normal);
                     mIvCalType2.setImageResource(R.mipmap.dialog_btn_zhuixian_selected);
                     type = 2;
+                    mListener.onConfirm(getDialog(), type);
                 }
             });
 

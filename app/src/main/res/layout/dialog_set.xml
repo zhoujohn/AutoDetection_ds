@@ -16,8 +16,8 @@
 
 
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_gravity="center_horizontal"
             android:src="@mipmap/icon_brightness"/>
 
@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:text="亮度调节"
+            android:visibility="gone"
             android:textSize="16sp"/>
 
         <LinearLayout
@@ -39,24 +40,24 @@
                 android:id="@+id/v_brightness_min"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:padding="10dp"
+                android:padding="15dp"
                 android:src="@mipmap/icon_brightness_min"/>
 
             <TextView
                 android:id="@+id/v_brightness_level"
-                android:layout_width="70dp"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="5"
                 android:textColor="@color/black"
-                android:textSize="25sp"/>
+                android:textSize="16sp"/>
 
 
             <ImageView
                 android:id="@+id/v_brightness_add"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:padding="10dp"
+                android:padding="15dp"
                 android:src="@mipmap/icon_brightness_add"/>
 
 

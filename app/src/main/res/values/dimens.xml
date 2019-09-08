@@ -3,7 +3,7 @@
 
     <dimen name="dialog_line_size">1px</dimen>
 
-    <dimen name="dialog_message_width">280dp</dimen>
+    <dimen name="dialog_message_width">180dp</dimen>
     <dimen name="dialog_message_round_size">15dp</dimen>
 
     <dimen name="dialog_menu_item_height">48dp</dimen>
