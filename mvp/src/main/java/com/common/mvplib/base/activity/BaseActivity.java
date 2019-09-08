@@ -257,12 +257,12 @@ public abstract class BaseActivity<BINDING extends ViewDataBinding> extends AppC
     private void _setInvasion() {
         ImmersionBar mImmersionBar = ImmersionBar.with(this);
         mImmersionBar.transparentStatusBar()                                                                     //透明状态栏，不写默认透明色
-//                .transparentNavigationBar()                                                                 //透明导航栏，不写默认黑色(设置此方法，fullScreen()方法自动为true)
+                .transparentNavigationBar()                                                                 //透明导航栏，不写默认黑色(设置此方法，fullScreen()方法自动为true)
                 .transparentBar()
 //                .fitsSystemWindows(true)
                 //透明状态栏和导航栏，不写默认状态栏为透明色，导航栏为黑色（设置此方法，fullScreen()方法自动为true）
 //                .statusBarColor(R.color.transparent)                                                     //状态栏颜色，不写默认透明色
-                .navigationBarColor(R.color.white)                                                 //导航栏颜色，不写默认黑色
+//                .navigationBarColor(R.color.white)                                                 //导航栏颜色，不写默认黑色
 //                .barColor(R.color.colorPrimary)                                                           //同时自定义状态栏和导航栏颜色，不写默认状态栏为透明色，导航栏为黑色
 //                .statusBarAlpha(0.3f)                                                                     //状态栏透明度，不写默认0.0f
 //                .navigationBarAlpha(0.4f)  //导航栏透明度，不写默认0.0F
