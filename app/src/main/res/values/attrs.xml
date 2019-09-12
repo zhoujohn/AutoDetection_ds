@@ -1,0 +1,18 @@
+<resources>
+
+    <attr name="cropImageStyle" format="reference"/>
+
+    <declare-styleable name="CalibrationView">
+        <!--选择框默认宽度-->
+        <attr name="baseWidth" format="dimension"/>
+        <!--长宽比例-->
+        <attr name="aspectRatio" format="float"/>
+        <!--边框颜色-->
+        <attr name="borderColor" format="reference|color"/>
+        <!--中线颜色-->
+        <attr name="lineColor" format="reference|color"/>
+        <!--是绘制中线-->
+        <attr name="showLine" format="boolean"/>
+    </declare-styleable>
+
+</resources>

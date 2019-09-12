@@ -18,6 +18,7 @@ import com.frt.autodetection.base.BaseConfigActivity;
 import com.frt.autodetection.databinding.ActivityMainBinding;
 import com.frt.autodetection.mvp.iview.IMainActivityView;
 import com.frt.autodetection.mvp.presenter.MainActivityPresenter;
+import com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView;
 import com.frt.autodetection.mvp.ui.widget.dialog.CalDialog;
 import com.frt.autodetection.mvp.ui.widget.dialog.SetDialog;
 import com.frt.autodetection.utils.RxDialog;
@@ -36,6 +37,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private int index = 0;
     private int show = 0;
+    private int offsetValue = 0;
 
     @Override
     public void onClick(View v) {
@@ -105,24 +107,45 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-        _cameraBridgeViewBase.setMaxFrameSize(640,200);
+        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
         _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
     }
+
 
     @Override
     public void afterInitView() {
 
     }
 
+
     @Override
     public void loadNetWork() {
 
     }
 
+
+
     @Override
     public void setListener() {
+        mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
+            @Override
+            public void OnOffsetChange(int value) {
+                offsetValue = value;
+                if (offsetValue > 0) {
+                    mBinding.vLeftTv.setText("0");
+                    mBinding.vRightTv.setText(offsetValue + "");
+                } else if (offsetValue < 0) {
+                    mBinding.vLeftTv.setText(offsetValue + "");
+                    mBinding.vRightTv.setText("0");
+                } else {
+                    mBinding.vLeftTv.setText("0");
+                    mBinding.vRightTv.setText("0");
+                }
+            }
+        });
+
         mBinding.vBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
