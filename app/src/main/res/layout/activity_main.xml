@@ -22,13 +22,12 @@
 
             <TextView
                 android:id="@+id/v_left_tv"
-                android:layout_width="20dp"
-                android:gravity="center"
+                android:layout_width="25dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
+                android:gravity="center"
                 android:text="0"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
             <RelativeLayout
@@ -70,6 +69,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:src="@color/black"
+                    android:visibility="invisible"
                     cv:showLine="true"/>
 
             </RelativeLayout>
@@ -77,13 +77,12 @@
 
             <TextView
                 android:id="@+id/v_right_tv"
-                android:layout_width="20dp"
-                android:gravity="center"
+                android:layout_width="25dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:gravity="center"
                 android:text="0"
                 android:textColor="@color/white"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
         </LinearLayout>
 
@@ -99,6 +98,50 @@
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"/>
+
+        <LinearLayout
+            android:id="@+id/v_layout_set"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/layout_set_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="75dp"
+            android:paddingEnd="60dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="12dp"
+                android:src="@mipmap/icon_brightness_white"/>
+
+            <ImageView
+                android:id="@+id/v_btn_brightness_min"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="17dp"
+                android:src="@mipmap/icon_brightness_min_white"/>
+
+            <TextView
+                android:id="@+id/v_brightness_tv"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="5"
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:id="@+id/v_btn_brightness_add"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="17dp"
+                android:src="@mipmap/icon_brightness_min_add"/>
+
+        </LinearLayout>
+        <!--✖  ⓧ-->
 
         <ImageView
             android:layout_width="600dp"
@@ -147,6 +190,7 @@
 
 
         <LinearLayout
+            android:id="@+id/v_layout_bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -194,6 +238,43 @@
                 android:layout_marginEnd="2dp"
                 android:src="@drawable/selector_bottom_btn5"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/v_layout_cal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/v_btn_zhuibian"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="22dp"
+                android:src="@drawable/selector_bottom_zhuibian"/>
+
+            <ImageView
+                android:id="@+id/v_btn_zhuixian"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="22dp"
+                android:layout_marginEnd="2dp"
+                android:src="@drawable/selector_bottom_zhuixian"/>
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/v_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/red"
+            android:textSize="11sp"/>
 
     </RelativeLayout>
 </layout>

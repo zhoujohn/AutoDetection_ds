@@ -137,7 +137,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     }
 
     public interface OnOffsetChangeListener {
-        void OnOffsetChange(int value);
+        void OnOffsetChange(int value, float left, float top, float width, float height);
     }
 
 
@@ -186,7 +186,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 case 1:
                     if (mOnOffsetChangeListener != null) {
                         int value = (int) (rect.centerX() - getMeasuredWidth() / 2);
-                        mOnOffsetChangeListener.OnOffsetChange(value);
+                        mOnOffsetChangeListener.OnOffsetChange(value,rect.left,rect.top,rect.width(),rect.height());
                     }
                     break;
             }

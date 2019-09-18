@@ -1,7 +1,6 @@
 package com.frt.autodetection.mvp.ui.activity;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,9 +18,6 @@ import com.frt.autodetection.databinding.ActivityMainBinding;
 import com.frt.autodetection.mvp.iview.IMainActivityView;
 import com.frt.autodetection.mvp.presenter.MainActivityPresenter;
 import com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView;
-import com.frt.autodetection.mvp.ui.widget.dialog.CalDialog;
-import com.frt.autodetection.mvp.ui.widget.dialog.SetDialog;
-import com.frt.autodetection.utils.RxDialog;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -38,6 +34,13 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private int index = 0;
     private int show = 0;
     private int offsetValue = 0;
+
+    private boolean isShowSetLayout;
+    private boolean isShowCalLayout;
+    //TODO 应该获取默认
+    private int currentBrightnessLevel = 5;
+    private int maxBrightnessLevel = 7;
+    private int minBrightnessLevel = 1;
 
     @Override
     public void onClick(View v) {
@@ -126,14 +129,14 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     }
 
 
-
     @Override
     public void setListener() {
         mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
             @Override
-            public void OnOffsetChange(int value) {
+            public void OnOffsetChange(int value, float left, float top, float width, float height) {
                 offsetValue = value;
-                if (offsetValue > 0) {
+                mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
+               /* if (offsetValue > 0) {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText(offsetValue + "");
                 } else if (offsetValue < 0) {
@@ -142,7 +145,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 } else {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
-                }
+                }*/
             }
         });
 
@@ -179,31 +182,81 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtnSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxDialog.showSetDialog(mBaseContext, 3, 6, 1, new SetDialog.OnListener() {
-                    @Override
-                    public void onBrightnessChange(Dialog dialog, int level) {
-                        RxToast.showToast("调用函数======》》》设置亮度值：" + level);
-                    }
-                });
+                isShowSetLayout = !isShowSetLayout;
+                isShowSetLayout(isShowSetLayout);
             }
         });
         mBinding.vBtnCal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxDialog.showCalDialog(mBaseContext, 1, new CalDialog.OnListener() {
-                    @Override
-                    public void onConfirm(Dialog dialog, int type) {
-                        RxToast.showToast("调用函数======》》》设置CAL模式：" + (type == 1 ? "追边模式" : "追线模式"));
-                    }
+                isShowCalLayout = !isShowCalLayout;
+                isShowCalLayout(isShowCalLayout);
+            }
+        });
+        mBinding.vBtnBrightnessMin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentBrightnessLevel > minBrightnessLevel) {
+                    currentBrightnessLevel--;
+                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                } else {
+                    RxToast.showToast("Already the lowest");
+                }
+            }
+        });
+        mBinding.vBtnBrightnessAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentBrightnessLevel < maxBrightnessLevel) {
+                    currentBrightnessLevel++;
+                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                } else {
+                    RxToast.showToast("Already the highest");
+                }
+            }
+        });
 
-                    @Override
-                    public void onCancel(Dialog dialog) {
-
-                    }
-                });
+        mBinding.vBtnZhuibian.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
+                RxToast.showToast("调用函数======》》》追边模式");
+            }
+        });
+        mBinding.vBtnZhuixian.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
+                RxToast.showToast("调用函数======》》》追线模式");
             }
         });
     }
+
+    private void isShowSetLayout(boolean isShowSetLayout) {
+        mBinding.vLayoutSet.setVisibility(isShowSetLayout ? View.VISIBLE : View.GONE);
+        mBinding.vBtnSet.setText(isShowSetLayout ? "ⓧ" : "SET");
+        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
+        if (isShowCalLayout) {
+            mBinding.vLayoutCal.setVisibility(View.GONE);
+            mBinding.vLayoutBottom.setVisibility(View.VISIBLE);
+            mBinding.vBtnCal.setText("CAL");
+            isShowCalLayout = false;
+        }
+    }
+
+    private void isShowCalLayout(boolean isShowCalLayout) {
+        mBinding.vLayoutBottom.setVisibility(isShowCalLayout ? View.GONE : View.VISIBLE);
+        mBinding.vLayoutCal.setVisibility(isShowCalLayout ? View.VISIBLE : View.GONE);
+        //选择框
+        mBinding.vCalibrationView.setVisibility(isShowCalLayout ? View.VISIBLE : View.INVISIBLE);
+        mBinding.vBtnCal.setText(isShowCalLayout ? "ⓧ" : "CAL");
+        if (isShowSetLayout) {
+            mBinding.vLayoutSet.setVisibility(View.GONE);
+            mBinding.vBtnSet.setText("SET");
+            isShowSetLayout = false;
+        }
+    }
+
 
     @Override
     public void onPause() {
