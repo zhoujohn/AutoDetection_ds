@@ -1,20 +1,20 @@
-package com.frt.autodetection.serial.key;
+package com.frt.autodetection.serial.controller;
 
 import android.os.RemoteCallbackList;
 import android.view.KeyEvent;
 
-import com.frt.autodetection.serial.IKeyCallback;
+import com.frt.autodetection.serial.IControllerCallback;
 import com.frt.autodetection.serial.SerialStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 
-public class KeyParserImpl implements KeyParser {
-	private RemoteCallbackList<IKeyCallback> callbacks;
+public class ControllerParserImpl implements ControllerParser {
+	private RemoteCallbackList<IControllerCallback> callbacks;
 	private OutputStream os;
 
-	public KeyParserImpl(RemoteCallbackList<IKeyCallback> callbacks) {
+	public ControllerParserImpl(RemoteCallbackList<IControllerCallback> callbacks) {
 		this.callbacks = callbacks;
 	}
 
@@ -154,7 +154,7 @@ public class KeyParserImpl implements KeyParser {
 		int i = callbacks.beginBroadcast();
 		while (i > 0) {
 			i--;
-			IKeyCallback callback = callbacks.getBroadcastItem(i);
+			IControllerCallback callback = callbacks.getBroadcastItem(i);
 			try {
 				callback.onkey(type, kcode, kstatus);
 			} catch (Exception ex) {

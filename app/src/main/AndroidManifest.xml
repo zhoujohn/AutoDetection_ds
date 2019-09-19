@@ -60,16 +60,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".serial.key.KeyService"
+        <service android:name=".serial.controller.ControllerService"
                  android:exported="true">
             <intent-filter>
                 <action android:name="com.frt.autodetection.serial.keyservice" />
-            </intent-filter>
-        </service>
-        <service android:name=".serial.obd.OBDService"
-                 android:exported="true">
-            <intent-filter>
-                <action android:name="com.frt.autodetection.serial.obdservice" />
             </intent-filter>
         </service>
     </application>

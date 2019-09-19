@@ -1,4 +1,4 @@
-package com.frt.autodetection.serial.key;
+package com.frt.autodetection.serial.controller;
 
 import android.app.Service;
 import android.content.Intent;
@@ -9,7 +9,7 @@ import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.util.Log;
 
-import com.frt.autodetection.serial.IKeyCallback;
+import com.frt.autodetection.serial.IControllerCallback;
 import com.frt.autodetection.serial.SerialManager;
 import com.frt.autodetection.serial.SerialPort;
 import com.frt.autodetection.serial.SerialStream;
@@ -19,17 +19,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class KeyService extends Service {
-	public static final String TAG = "KeyService";
+public class ControllerService extends Service {
+	public static final String TAG = "ControllerService";
 	public static final int MSG_START_SERIAL = 1;
 	public static final int MSG_SERIAL_RECEIVED = 2;
 	private static final int RESTART_DELAY = 1200; // ms
 
 	private SerialThread serialThread = null;
 	private volatile boolean running = false;
-	private RemoteCallbackList<IKeyCallback> callbacks = null;
+	private RemoteCallbackList<IControllerCallback> callbacks = null;
 	private Handler handler = null;
-	private KeyParser parser = null;
+	private ControllerParser parser = null;
 
 	@Override
 	public void onCreate() {
@@ -60,8 +60,8 @@ public class KeyService extends Service {
 				}
 			};
 		};
-		callbacks = new RemoteCallbackList<IKeyCallback>();
-		parser = new KeyParserImpl(callbacks);
+		callbacks = new RemoteCallbackList<IControllerCallback>();
+		parser = new ControllerParserImpl(callbacks);
 		handler.sendEmptyMessage(MSG_START_SERIAL);
 		running = true;
 	}
@@ -81,16 +81,16 @@ public class KeyService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		System.out.println("进入了onBind方法");
-		return new KeyServiceImpl(this);
+		return new ControllerServiceImpl(this);
 	}
 
-	public void registerCallback(IKeyCallback callback) {
-		Log.d("key", "KeyService registerCallback");
+	public void registerCallback(IControllerCallback callback) {
+		Log.d("Controller", "ControllerService registerCallback");
 		callbacks.register(callback);
 	}
 
-	public void unregisterCallback(IKeyCallback callback) {
-		Log.d("key", "KeyService unregisterCallback");
+	public void unregisterCallback(IControllerCallback callback) {
+		Log.d("Controller", "ControllerService unregisterCallback");
 		callbacks.unregister(callback);
 	}
 
@@ -139,7 +139,7 @@ public class KeyService extends Service {
 			int n;
 			SerialPort serial = null;
 			try {
-				serial = new SerialPort(new File("/dev/ttyMT2"), 9600, 0); // : Zigbee(Keyboard)
+				serial = new SerialPort(new File("/dev/ttyS4"), 19200, 0); // : Controller through RS232
 				inputStream = serial.getInputStream();
 				outputStream = serial.getOutputStream();
 				while (running) {
@@ -150,7 +150,7 @@ public class KeyService extends Service {
 						}
 						if (n > 0) {
 							stream.put(buffer, n);
-							if (stream.getLength() >= KeyParser.LENGTH) {
+							if (stream.getLength() >= ControllerParser.LENGTH) {
 								sendRecvMsg(stream);
 							}
 						}

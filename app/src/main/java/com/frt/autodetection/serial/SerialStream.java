@@ -1,11 +1,11 @@
 package com.frt.autodetection.serial;
 
 /**
- * 串口接收解析流
+ * serial receive parser flow
  * 
- * @author horizonx
+ * @author frt
  * @link 
- * @Copyright BeiJing horizonx Tech Co.LTD
+ * @Copyright BeiJing fusionreality Co.ltd
  */
 public class SerialStream {
 	private int start = 0;

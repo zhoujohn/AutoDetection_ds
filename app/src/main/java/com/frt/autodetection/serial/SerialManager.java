@@ -5,8 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.frt.autodetection.serial.key.KeyConnection;
-import com.frt.autodetection.serial.obd.OBDConnection;
+import com.frt.autodetection.serial.controller.ControllerConnection;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,10 +14,8 @@ import java.io.IOException;
 public class SerialManager {
 	private static SerialManager _instance = new SerialManager();
 	private boolean restart = false;
-	private OBDConnection obd = new OBDConnection();
-	private KeyConnection key = new KeyConnection();
-	private Intent keyIntent = new Intent("com.horizonx.serial.key.KeyService");
-	private Intent obdIntent = new Intent("com.horizonx.serial.obd.OBDService");
+	private ControllerConnection controller = new ControllerConnection();
+	private Intent controllerIntent = new Intent("com.frt.autodetection.serial.controller.ControllerService");
 	private SerialCallback callback;
 
 	public static SerialManager get() {
@@ -27,35 +24,23 @@ public class SerialManager {
 
 	public void init(Activity activity) {
 		boolean ret = false;
-		ret = activity.bindService(keyIntent, key, Context.BIND_AUTO_CREATE);
+		ret = activity.bindService(controllerIntent, controller, Context.BIND_AUTO_CREATE);
 		if (!ret) {
-			Log.e("SerialManager", "Cannot bind key service!");
+			Log.e("SerialManager", "Cannot bind controller service!");
 		}
-		
-	   ret = activity.bindService(obdIntent, obd, Context.BIND_AUTO_CREATE); 
-	   if (!ret) { 
-		   Log.e("SerialManager", "Cannot bind obd service!"); 
-	   }
+
 	}
 	
-	public void initKey(Activity activity) {
+	public void initController(Activity activity) {
 		boolean ret = false;
-		ret = activity.bindService(keyIntent, key, Context.BIND_AUTO_CREATE);
+		ret = activity.bindService(controllerIntent, controller, Context.BIND_AUTO_CREATE);
 		if (!ret) {
-			Log.e("SerialManager", "Cannot bind key service!");
-		}
-	}
-	
-	public void initObd(Activity activity) {
-		boolean ret = false;
-		ret = activity.bindService(obdIntent, obd, Context.BIND_AUTO_CREATE);
-		if (!ret) {
-			Log.e("SerialManager", "Cannot bind obd service!");
+			Log.e("SerialManager", "Cannot bind controller service!");
 		}
 	}
 
 	public void destory(Activity activity) {
-		activity.stopService(keyIntent);
+		activity.stopService(controllerIntent);
 	}
 
 	private void writePort(String port, byte[] command) {
@@ -77,12 +62,8 @@ public class SerialManager {
 		}
 	}
 
-	public OBDConnection getObd() {
-		return obd;
-	}
-
-	public KeyConnection getKey() {
-		return key;
+	public ControllerConnection getController() {
+		return controller;
 	}
 
 	public boolean isRestart() {

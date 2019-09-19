@@ -1,25 +1,25 @@
-package com.frt.autodetection.serial.key;
+package com.frt.autodetection.serial.controller;
 
 import android.os.RemoteException;
 
-import com.frt.autodetection.serial.IKeyCallback;
-import com.frt.autodetection.serial.IKeyService;
+import com.frt.autodetection.serial.IControllerCallback;
+import com.frt.autodetection.serial.IControllerService;
 
 
-public class KeyServiceImpl extends IKeyService.Stub {
-	private KeyService service;
+public class ControllerServiceImpl extends IControllerService.Stub {
+	private ControllerService service;
 
-	public KeyServiceImpl(KeyService service) {
+	public ControllerServiceImpl(ControllerService service) {
 		this.service = service;
 	}
 
 	@Override
-	public void registerCallback(IKeyCallback callback) throws RemoteException {
+	public void registerCallback(IControllerCallback callback) throws RemoteException {
 		service.registerCallback(callback);
 	}
 
 	@Override
-	public void unregisterCallback(IKeyCallback callback) throws RemoteException {
+	public void unregisterCallback(IControllerCallback callback) throws RemoteException {
 		service.unregisterCallback(callback);
 	}
 
