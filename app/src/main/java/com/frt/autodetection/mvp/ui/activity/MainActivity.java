@@ -8,9 +8,10 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
+
 
 import com.common.baselib.utils.RxToast;
+import android.widget.Toast;
 import com.common.mvplib.config.LayoutConfig;
 import com.frt.autodetection.R;
 import com.frt.autodetection.base.BaseConfigActivity;
