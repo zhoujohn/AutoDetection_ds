@@ -236,7 +236,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private void isShowSetLayout(boolean isShowSetLayout) {
         mBinding.vLayoutSet.setVisibility(isShowSetLayout ? View.VISIBLE : View.GONE);
         mBinding.vBtnSet.setText(isShowSetLayout ? "ⓧ" : "SET");
-        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
+//        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
+        mBinding.vCalibrationView.setIsTouch(false);
         if (isShowCalLayout) {
             mBinding.vLayoutCal.setVisibility(View.GONE);
             mBinding.vLayoutBottom.setVisibility(View.VISIBLE);
@@ -249,7 +250,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vLayoutBottom.setVisibility(isShowCalLayout ? View.GONE : View.VISIBLE);
         mBinding.vLayoutCal.setVisibility(isShowCalLayout ? View.VISIBLE : View.GONE);
         //选择框
-        mBinding.vCalibrationView.setVisibility(isShowCalLayout ? View.VISIBLE : View.INVISIBLE);
+//        mBinding.vCalibrationView.setVisibility(isShowCalLayout ? View.VISIBLE : View.INVISIBLE);
+        mBinding.vCalibrationView.setIsTouch(isShowCalLayout);
         mBinding.vBtnCal.setText(isShowCalLayout ? "ⓧ" : "CAL");
         if (isShowSetLayout) {
             mBinding.vLayoutSet.setVisibility(View.GONE);

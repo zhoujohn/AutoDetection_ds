@@ -69,7 +69,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:src="@color/black"
-                    android:visibility="invisible"
                     cv:showLine="true"/>
 
             </RelativeLayout>
