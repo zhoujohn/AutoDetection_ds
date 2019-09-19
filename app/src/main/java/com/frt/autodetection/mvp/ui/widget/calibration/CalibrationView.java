@@ -88,6 +88,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;
 
+    private boolean isTouch;
+
     /**
      * 初始化获取屏幕宽高
      */
@@ -151,6 +153,10 @@ public class CalibrationView extends View implements View.OnTouchListener {
         rect.bottom = rect.top + viewHeight;
     }
 
+    public void setIsTouch(boolean isTouch) {
+        this.isTouch = isTouch;
+    }
+
     private void scaleRect(float scale) {
 //        viewWidth = viewWidth * scale;
 //        viewHeight = viewHeight * scale;
@@ -186,7 +192,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 case 1:
                     if (mOnOffsetChangeListener != null) {
                         int value = (int) (rect.centerX() - getMeasuredWidth() / 2);
-                        mOnOffsetChangeListener.OnOffsetChange(value,rect.left,rect.top,rect.width(),rect.height());
+                        mOnOffsetChangeListener.OnOffsetChange(value, rect.left, rect.top, rect.width(), rect.height());
                     }
                     break;
             }
@@ -220,6 +226,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (!isTouch)
+            return false;
         // TODO Auto-generated method stub
         // return ArtFilterActivity.this.mGestureDetector.onTouchEvent(event);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
