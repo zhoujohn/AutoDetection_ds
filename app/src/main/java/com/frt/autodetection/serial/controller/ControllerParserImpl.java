@@ -31,7 +31,7 @@ public class ControllerParserImpl implements ControllerParser {
 			int kstatus = stream.getInt(12);
 			stream.skip(LENGTH - 1);
 			sendCode(fcode, kcode, kstatus);
-			dispatchKey(fcode, kcode, kstatus);
+			//dispatchKey(fcode, kcode, kstatus);
 		}
 	}
 	

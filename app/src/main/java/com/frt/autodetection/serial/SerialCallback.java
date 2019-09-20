@@ -23,6 +23,8 @@ public interface SerialCallback {
 	 */
 	public void onGetData(String data);
 
+	// type 1: 控制器中作状态状态 --> key(0:回中; 1:自动; 2:手动)
+    // type 2: TBD
 	public void oncontroller(int type, int key, int status);
 
 }
