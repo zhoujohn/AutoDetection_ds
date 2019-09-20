@@ -33,6 +33,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private static final String TAG = "OCVSample::Activity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private int index = 0;
+    private int shift = 0;
     private int show = 0;
     private int offsetValue = 0;
 
@@ -327,8 +328,11 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         //////////////////////////////////////////////////
         // send frame to CV algorithm
-        //Mat matGray = inputFrame.gray();
-        //linedetection(matGray.getNativeObjAddr(), 100);
+        Mat matGray = inputFrame.gray();
+        shift = linedetection(matGray.getNativeObjAddr(), 400);
+        Log.i(TAG, "XXXFrame index is:" + shift);
+
+        // TODO: 1. send shift value through Serial; 2. show shift value and red_box on UI
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();
@@ -343,4 +347,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     // start detection of line
     // input Frame data, cal type(returned by line_calibration
     public native int linedetection(long matAddrGray, int cal_type);
+
+    // give calibration area information to native algorithms.
+    public native void setvalidpos(int x, int y, int w, int h);
 }
