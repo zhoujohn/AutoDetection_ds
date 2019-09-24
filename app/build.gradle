@@ -24,19 +24,20 @@ android {
                 arguments = [moduleName: project.getName()]
             }
         }
-        externalNativeBuild {
+        /*externalNativeBuild {
             cmake {
                 cppFlags "-frtti -fexceptions"
                 abiFilters 'arm64-v8a', 'armeabi-v7a'
             }
-        }
+        }*/
         //jni start
         ndk {
-            moduleName "JniLib"
-//            abiFilters 'arm64-v8a', 'armeabi', 'armeabi-v7a' //, 'x86', 'armeabi-v7a', 'x86_64'
+//            moduleName "JniLib"
+            abiFilters 'armeabi-v7a','arm64-v8a'
+            //, 'x86', 'armeabi-v7a', 'x86_64'
         }
         sourceSets.main {
-            jniLibs.srcDirs = ['libs']
+//            jniLibs.srcDirs = ['libs']
 //            jniLibs.srcDir "src/main/libs"
         }
         //jni end
@@ -44,7 +45,7 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['src/main/libs','src/main/jniLibs/OpenCV-android-sdk/sdk/native/libs']
+            jniLibs.srcDirs = ['src/main/libs', 'src/main/jniLibs/OpenCV-android-sdk/sdk/native/libs']
         }
     }
     signingConfigs {
