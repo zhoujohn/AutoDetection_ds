@@ -7,4 +7,5 @@ interface IControllerService {
 	void unregisterCallback(IControllerCallback callback);
 	
 	void write(boolean open);
+	void writeStr(String cmd);
 }

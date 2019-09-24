@@ -7,10 +7,10 @@
 using namespace std;
 using namespace cv;
 
-int xpos = 300;
-int ypos = 80;
-int width = 80;
-int height = 40;
+float xpos = 300;
+float ypos = 80;
+float width = 80;
+float height = 40;
 
 extern "C"
 {
@@ -35,7 +35,7 @@ int JNICALL Java_com_frt_autodetection_mvp_ui_activity_MainActivity_linedetectio
 
 // save calibration area
 void JNICALL Java_com_frt_autodetection_mvp_ui_activity_MainActivity_setvalidpos(JNIEnv *env, jobject instance,
-                                                                                  jint x, jint y, jint w, jint h) {
+                                                                                  jfloat x, jfloat y, jfloat w, jfloat h) {
     xpos = x;
     ypos = y;
     width = w;

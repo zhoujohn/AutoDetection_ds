@@ -4,21 +4,25 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-
+import android.widget.Toast;
 
 import com.common.baselib.utils.RxToast;
-import android.widget.Toast;
 import com.common.mvplib.config.LayoutConfig;
 import com.frt.autodetection.R;
 import com.frt.autodetection.base.BaseConfigActivity;
+import com.frt.autodetection.constant.AppInfo;
 import com.frt.autodetection.databinding.ActivityMainBinding;
 import com.frt.autodetection.mvp.iview.IMainActivityView;
 import com.frt.autodetection.mvp.presenter.MainActivityPresenter;
 import com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView;
+import com.frt.autodetection.serial.OnKeyEventReceiveListener;
+import com.frt.autodetection.serial.SerialPortTerminal;
+import com.frt.autodetection.utils.helper.SpHelper;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -40,7 +44,11 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private boolean isShowSetLayout;
     private boolean isShowCalLayout;
     //TODO 应该获取默认
-    private int currentBrightnessLevel = 5;
+    //默认亮度值
+    private int currentBrightnessLevel = 4;
+    //默认 切换模式
+    private int currentSwitchMode = 0;
+    //亮度最大值 和 最小值
     private int maxBrightnessLevel = 7;
     private int minBrightnessLevel = 1;
 
@@ -102,6 +110,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //获取亮度值
+        currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 4);
+        //或者追边/追线模式
+        currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
@@ -148,6 +160,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }*/
+                setvalidpos(left,top,width,height);
             }
         });
 
@@ -155,30 +168,55 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             @Override
             public void onClick(View v) {
                 RxToast.showToast("调用函数======》》》底部按钮1");
+                try {
+                    SerialPortTerminal.getInstance().white("0x0001");
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RxToast.showToast("调用函数======》》》底部按钮2");
+                try {
+                    SerialPortTerminal.getInstance().white("0x0002");
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RxToast.showToast("调用函数======》》》底部按钮3");
+                try {
+                    SerialPortTerminal.getInstance().white("0x0003");
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtn4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RxToast.showToast("调用函数======》》》底部按钮4");
+                try {
+                    SerialPortTerminal.getInstance().white("0x0004");
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtn5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RxToast.showToast("调用函数======》》》底部按钮5");
+                try {
+                    SerialPortTerminal.getInstance().white("0x0005");
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtnSet.setOnClickListener(new View.OnClickListener() {
@@ -221,6 +259,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtnZhuibian.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                currentSwitchMode = 0;
                 mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
                 RxToast.showToast("调用函数======》》》追边模式");
             }
@@ -228,6 +267,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtnZhuixian.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                currentSwitchMode = 1;
                 mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
                 RxToast.showToast("调用函数======》》》追线模式");
             }
@@ -307,6 +347,22 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         disableCamera();
     }
 
+    @Override
+    public OnKeyEventReceiveListener setOnKeyEventReceiveListener() {
+        return mOnKeyEventReceiveListener;
+    }
+
+    //这是串口的回调  在这里切换右上角图标
+    private OnKeyEventReceiveListener mOnKeyEventReceiveListener = new OnKeyEventReceiveListener() {
+        //封装回调
+        //保存当前的亮度/模式 值
+        //SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, current***);
+        @Override
+        public void onDialShortDown() {
+            super.onDialShortDown();
+        }
+    };
+
     public void disableCamera() {
         if (_cameraBridgeViewBase != null)
             _cameraBridgeViewBase.disableView();
@@ -349,5 +405,5 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     public native int linedetection(long matAddrGray, int cal_type);
 
     // give calibration area information to native algorithms.
-    public native void setvalidpos(int x, int y, int w, int h);
+    public native void setvalidpos(float x, float y, float w, float h);
 }

@@ -56,4 +56,9 @@ public class ControllerServiceImpl extends IControllerService.Stub {
 		command[pos++] = 0x16;
 		service.write(command);
 	}
+
+	@Override
+	public void writeStr(String cmd){
+		service.write(cmd);
+	}
 }

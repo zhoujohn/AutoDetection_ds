@@ -63,7 +63,7 @@
         <service android:name=".serial.controller.ControllerService"
                  android:exported="true">
             <intent-filter>
-                <action android:name="com.frt.autodetection.serial.keyservice" />
+                <action android:name="com.frt.autodetection.serial.ControllerService" />
             </intent-filter>
         </service>
     </application>

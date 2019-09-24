@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.common.baselib.AppConfig;
+import com.frt.autodetection.serial.SerialPortTerminal;
 
 import cn.bingoogolapple.swipebacklayout.BGASwipeBackHelper;
 
@@ -18,7 +19,7 @@ import cn.bingoogolapple.swipebacklayout.BGASwipeBackHelper;
 //@InitContext
 public class App extends Application {
     private static Context sContext;
-
+    private SerialPortTerminal mSerialPortTerminal;
     //TODO  onCreate 走了两次 需要处理一下 DataInit
     @Override
     public void onCreate() {
@@ -29,10 +30,16 @@ public class App extends Application {
         //初始化界面侧滑
         BGASwipeBackHelper.init(this, null);
 
+        mSerialPortTerminal = SerialPortTerminal.getInstance();
     }
 
     public static Context getAppContext() {
         return sContext;
     }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        mSerialPortTerminal.releaseControllerServicesResources();
+    }
 }

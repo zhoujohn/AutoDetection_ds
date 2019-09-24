@@ -58,7 +58,7 @@ public class ControllerService extends Service {
 					SerialStream stream = (SerialStream) msg.obj;
 					parser.onBytes(stream);
 				}
-			};
+			}
 		};
 		callbacks = new RemoteCallbackList<IControllerCallback>();
 		parser = new ControllerParserImpl(callbacks);
