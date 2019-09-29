@@ -91,10 +91,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             //for new api versions.
             View decorView = getWindow().getDecorView();
             int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    //| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE
+                    //| View.SYSTEM_UI_FLAG_IMMERSIVE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN;
             decorView.setSystemUiVisibility(uiOptions);
         }
@@ -149,7 +149,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             @Override
             public void OnOffsetChange(int value, float left, float top, float width, float height) {
                 offsetValue = value;
-                mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
+                //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
                /* if (offsetValue > 0) {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText(offsetValue + "");
@@ -167,7 +167,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxToast.showToast("调用函数======》》》底部按钮1");
+                //RxToast.showToast("调用函数======》》》底部按钮1");
                 try {
                     SerialPortTerminal.getInstance().white("0x0001");
                 } catch (RemoteException e) {
@@ -178,7 +178,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxToast.showToast("调用函数======》》》底部按钮2");
+                //RxToast.showToast("调用函数======》》》底部按钮2");
                 try {
                     SerialPortTerminal.getInstance().white("0x0002");
                 } catch (RemoteException e) {
@@ -189,7 +189,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxToast.showToast("调用函数======》》》底部按钮3");
+                //RxToast.showToast("调用函数======》》》底部按钮3");
                 try {
                     SerialPortTerminal.getInstance().white("0x0003");
                 } catch (RemoteException e) {
@@ -200,7 +200,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtn4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxToast.showToast("调用函数======》》》底部按钮4");
+                //RxToast.showToast("调用函数======》》》底部按钮4");
                 try {
                     SerialPortTerminal.getInstance().white("0x0004");
                 } catch (RemoteException e) {
@@ -211,7 +211,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vBtn5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RxToast.showToast("调用函数======》》》底部按钮5");
+                //RxToast.showToast("调用函数======》》》底部按钮5");
                 try {
                     SerialPortTerminal.getInstance().white("0x0005");
                 } catch (RemoteException e) {
@@ -239,8 +239,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 if (currentBrightnessLevel > minBrightnessLevel) {
                     currentBrightnessLevel--;
                     mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+
+                    // send backlight brightness value to camera controller
+                    try {
+                        SerialPortTerminal.getInstance().white("0x0010"+String.valueOf(currentBrightnessLevel));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
                 } else {
-                    RxToast.showToast("Already the lowest");
+                    //RxToast.showToast("Already the lowest");
                 }
             }
         });
@@ -250,8 +258,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 if (currentBrightnessLevel < maxBrightnessLevel) {
                     currentBrightnessLevel++;
                     mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+
+                    // send backlight brightness value to camera controller
+                    try {
+                        SerialPortTerminal.getInstance().white("0x0010"+String.valueOf(currentBrightnessLevel));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
                 } else {
-                    RxToast.showToast("Already the highest");
+                    //RxToast.showToast("Already the highest");
                 }
             }
         });
@@ -261,7 +277,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 currentSwitchMode = 0;
                 mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
-                RxToast.showToast("调用函数======》》》追边模式");
+                //RxToast.showToast("调用函数======》》》追边模式");
             }
         });
         mBinding.vBtnZhuixian.setOnClickListener(new View.OnClickListener() {
@@ -269,7 +285,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 currentSwitchMode = 1;
                 mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
-                RxToast.showToast("调用函数======》》》追线模式");
+                //RxToast.showToast("调用函数======》》》追线模式");
             }
         });
     }
@@ -388,7 +404,21 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         shift = linedetection(matGray.getNativeObjAddr(), 400);
         Log.i(TAG, "XXXFrame index is:" + shift);
 
-        // TODO: 1. send shift value through Serial; 2. show shift value and red_box on UI
+        // TODO: 1. show shift value and red_box on UI
+        // send shift value to controller
+        try {
+            int absShift = (shift > 0) ? shift : -shift;
+            String index;
+            if (shift > 0) {
+                index = "0x0050";
+            } else {
+                index = "0x0060";
+            }
+            SerialPortTerminal.getInstance().white(index + absShift);
+            Log.i(TAG, "Shift value of SERIAL is:" + index + absShift);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();
