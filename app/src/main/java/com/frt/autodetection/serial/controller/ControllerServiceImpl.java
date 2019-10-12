@@ -61,4 +61,9 @@ public class ControllerServiceImpl extends IControllerService.Stub {
 	public void writeStr(String cmd){
 		service.write(cmd);
 	}
+
+	@Override
+	public void writeByte(byte[] cmd) throws RemoteException {
+		service.write(cmd);
+	}
 }

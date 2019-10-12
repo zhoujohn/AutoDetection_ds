@@ -197,6 +197,10 @@ public class SerialPortTerminal {
     public void white(String cmd) throws RemoteException {
         mService.writeStr(cmd);
     }
+    public void whiteByte(byte [] cmd) throws RemoteException {
+        mService.writeByte(cmd);
+    }
+
 
     private void checkForegroundPager() {
         Iterator<Map.Entry<Activity, OnKeyEventReceiveListener>> iterator = eventTask

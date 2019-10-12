@@ -8,4 +8,5 @@ interface IControllerService {
 	
 	void write(boolean open);
 	void writeStr(String cmd);
+	void writeByte(in byte [] cmd);
 }

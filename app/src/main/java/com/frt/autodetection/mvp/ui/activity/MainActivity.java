@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.common.baselib.utils.RxToast;
 import com.common.mvplib.config.LayoutConfig;
 import com.frt.autodetection.R;
 import com.frt.autodetection.base.BaseConfigActivity;
@@ -160,7 +159,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }*/
-                setvalidpos(left,top,width,height);
+                setvalidpos(left, top, width, height);
             }
         });
 
@@ -169,7 +168,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 //RxToast.showToast("调用函数======》》》底部按钮1");
                 try {
-                    SerialPortTerminal.getInstance().white("0x0001");
+                    //X1=5   手动IN
+                    byte[] cmd = new byte[6];
+                    cmd[0] = (byte) 0xA5;
+                    cmd[1] = (byte) 0x83;
+                    cmd[2] = (byte) 0x05;
+                    cmd[3] = (byte) 0x00;
+                    cmd[4] = (byte) 0x00;
+                    cmd[5] = (byte) 0x16;
+
+                    SerialPortTerminal.getInstance().whiteByte(cmd);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -180,7 +188,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 //RxToast.showToast("调用函数======》》》底部按钮2");
                 try {
-                    SerialPortTerminal.getInstance().white("0x0002");
+                    //X1=6   手动OUT
+                    byte[] cmd = new byte[6];
+                    cmd[0] = (byte) 0xA5;
+                    cmd[1] = (byte) 0x83;
+                    cmd[2] = (byte) 0x06;
+                    cmd[3] = (byte) 0x00;
+                    cmd[4] = (byte) 0x00;
+                    cmd[5] = (byte) 0x16;
+
+                    SerialPortTerminal.getInstance().whiteByte(cmd);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -191,7 +208,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 //RxToast.showToast("调用函数======》》》底部按钮3");
                 try {
-                    SerialPortTerminal.getInstance().white("0x0003");
+                    //X1= 1  手动
+                    byte[] cmd = new byte[6];
+                    cmd[0] = (byte) 0xA5;
+                    cmd[1] = (byte) 0x83;
+                    cmd[2] = (byte) 0x01;
+                    cmd[3] = (byte) 0x00;
+                    cmd[4] = (byte) 0x00;
+                    cmd[5] = (byte) 0x16;
+
+                    SerialPortTerminal.getInstance().whiteByte(cmd);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -202,7 +228,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 //RxToast.showToast("调用函数======》》》底部按钮4");
                 try {
-                    SerialPortTerminal.getInstance().white("0x0004");
+                    //X1=2   自动
+                    byte[] cmd = new byte[6];
+                    cmd[0] = (byte) 0xA5;
+                    cmd[1] = (byte) 0x83;
+                    cmd[2] = (byte) 0x02;
+                    cmd[3] = (byte) 0x00;
+                    cmd[4] = (byte) 0x00;
+                    cmd[5] = (byte) 0x16;
+
+                    SerialPortTerminal.getInstance().whiteByte(cmd);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -213,7 +248,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             public void onClick(View v) {
                 //RxToast.showToast("调用函数======》》》底部按钮5");
                 try {
-                    SerialPortTerminal.getInstance().white("0x0005");
+                    //X1=3   回中
+                    byte[] cmd = new byte[6];
+                    cmd[0] = (byte) 0xA5;
+                    cmd[1] = (byte) 0x83;
+                    cmd[2] = (byte) 0x03;
+                    cmd[3] = (byte) 0x00;
+                    cmd[4] = (byte) 0x00;
+                    cmd[5] = (byte) 0x16;
+
+                    SerialPortTerminal.getInstance().whiteByte(cmd);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -242,7 +286,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
                     // send backlight brightness value to camera controller
                     try {
-                        SerialPortTerminal.getInstance().white("0x0010"+String.valueOf(currentBrightnessLevel));
+                        SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -261,7 +305,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
                     // send backlight brightness value to camera controller
                     try {
-                        SerialPortTerminal.getInstance().white("0x0010"+String.valueOf(currentBrightnessLevel));
+                        SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -278,6 +322,12 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 currentSwitchMode = 0;
                 mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
                 //RxToast.showToast("调用函数======》》》追边模式");
+                // send backlight brightness value to camera controller
+                try {
+                    SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         mBinding.vBtnZhuixian.setOnClickListener(new View.OnClickListener() {

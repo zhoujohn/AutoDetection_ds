@@ -139,7 +139,7 @@ public class ControllerService extends Service {
 			int n;
 			SerialPort serial = null;
 			try {
-				serial = new SerialPort(new File("/dev/ttyS4"), 19200, 0); // : Controller through RS232
+				serial = new SerialPort(new File("/dev/ttyS4"), 57600, 0); // : Controller through RS232
 				inputStream = serial.getInputStream();
 				outputStream = serial.getOutputStream();
 				while (running) {
