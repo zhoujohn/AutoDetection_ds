@@ -177,6 +177,10 @@ public class SerialPortTerminal {
             public void onServiceConnected(ComponentName name, IBinder service) {
 
                 mService = IControllerService.Stub.asInterface(service);
+                //服务绑定成功 通知调用串口初始化方法
+                if (mOnSerialServiceBindListener != null) {
+                    mOnSerialServiceBindListener.OnSerialServiceBind();
+                }
 
                 try {
                     mService.registerCallback(myCallback);
@@ -194,10 +198,21 @@ public class SerialPortTerminal {
 
     }
 
+    private OnSerialServiceBindListener mOnSerialServiceBindListener;
+
+    public void setOnSerialServiceBindListener(OnSerialServiceBindListener listener) {
+        mOnSerialServiceBindListener = listener;
+    }
+
+    public interface OnSerialServiceBindListener {
+        void OnSerialServiceBind();
+    }
+
     public void white(String cmd) throws RemoteException {
         mService.writeStr(cmd);
     }
-    public void whiteByte(byte [] cmd) throws RemoteException {
+
+    public void whiteByte(byte[] cmd) throws RemoteException {
         mService.writeByte(cmd);
     }
 
@@ -271,5 +286,116 @@ public class SerialPortTerminal {
         mService = null;
     }
 
+    /**
+     * 纠偏控制指令：A5  83  X1  00  00  16
+     * X1= 1  手动
+     * X1=2   自动
+     * X1=3   回中
+     * X1=4   回中结束
+     * X1=5   手动IN
+     * X1=6   手动OUT
+     * 无应答
+     */
+
+    public void whiteBtn1() {
+        try {
+            //X1=5   手动IN
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x83;
+            cmd[2] = (byte) 0x05;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void whiteBtn2() {
+        try {
+            //X1=6   手动OUT
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x83;
+            cmd[2] = (byte) 0x06;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void whiteBtn3() {
+        try {
+            //X1= 1  手动
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x83;
+            cmd[2] = (byte) 0x01;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void whiteBtn4() {
+        try {
+            //X1=2   自动
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x83;
+            cmd[2] = (byte) 0x02;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void whiteBtn5() {
+        try {
+            //X1=3   回中
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x83;
+            cmd[2] = (byte) 0x03;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //光源强度调节指令：A5  82  X1  00  00  16
+    public void writeBrightness(int brightness) {
+        try {
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x82;
+            cmd[2] = (byte) brightness;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

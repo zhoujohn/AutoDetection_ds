@@ -2,7 +2,6 @@ package com.frt.autodetection.mvp.ui.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -44,17 +43,17 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private boolean isShowCalLayout;
     //TODO 应该获取默认
     //默认亮度值
-    private int currentBrightnessLevel = 4;
-    //默认 切换模式
+    private int currentBrightnessLevel = 5;
+    //默认 切换模式 追边0 追线1
     private int currentSwitchMode = 0;
+    //手动 0  自动 1
+    private int currentSwitchControl = 0;
     //亮度最大值 和 最小值
     private int maxBrightnessLevel = 7;
     private int minBrightnessLevel = 1;
+    //亮度level值 分7段
+    private int[] brightnessArr = {14, 28, 42, 56, 70, 84, 100};
 
-    @Override
-    public void onClick(View v) {
-
-    }
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -82,21 +81,6 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     @Override
     public int getLayoutId() {
-        //透明底部导航栏
-        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) {
-            View v = this.getWindow().getDecorView();
-            v.setSystemUiVisibility(View.GONE);
-        } else if (Build.VERSION.SDK_INT >= 19) {
-            //for new api versions.
-            View decorView = getWindow().getDecorView();
-            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    //| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    //| View.SYSTEM_UI_FLAG_IMMERSIVE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN;
-            decorView.setSystemUiVisibility(uiOptions);
-        }
         return R.layout.activity_main;
     }
 
@@ -109,10 +93,6 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //获取亮度值
-        currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 4);
-        //或者追边/追线模式
-        currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
@@ -135,6 +115,35 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     }
 
+    /**
+     * 获取缺省/已保存数据进行配置
+     * =======================================================
+     * ==== Tips ===如果串口启动如果时间过长的话，可以考虑延迟调用此方法）
+     * ========================================================
+     */
+    protected void initParamData() {
+        // 1）获取亮度值
+        currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 5);
+        mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+        //初始化设置亮度
+        SerialPortTerminal.getInstance().writeBrightness(0x11);
+
+        // 2）或者追边/追线模式
+        currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
+        mBinding.vTopBtn1.setImageResource(currentSwitchMode == 0 ? R.drawable.icon_zhuibian_white : R.drawable.icon_zhuixian_white);
+        //  通过JNI通知算法 追边模式
+        //  linedetection(0,currentSwitchMode);
+
+        // 3）手动/自动
+        currentSwitchControl = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_CONTROL, 0);
+        mBinding.vTopBtn2.setImageResource(currentSwitchControl == 0 ? R.drawable.bottom_btn_3_normal : R.drawable.bottom_btn_4_normal);
+        if (currentSwitchControl == 0) {
+            SerialPortTerminal.getInstance().whiteBtn3();
+        } else {
+            SerialPortTerminal.getInstance().whiteBtn4();
+        }
+    }
+
 
     @Override
     public void loadNetWork() {
@@ -148,196 +157,96 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             @Override
             public void OnOffsetChange(int value, float left, float top, float width, float height) {
                 offsetValue = value;
-                //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
-               /* if (offsetValue > 0) {
+                mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
+
+                if (value > 0) {
                     mBinding.vLeftTv.setText("0");
-                    mBinding.vRightTv.setText(offsetValue + "");
-                } else if (offsetValue < 0) {
-                    mBinding.vLeftTv.setText(offsetValue + "");
+                    mBinding.vRightTv.setText(value + "");
+                } else if (value < 0) {
+                    mBinding.vLeftTv.setText(value + "");
                     mBinding.vRightTv.setText("0");
                 } else {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
-                }*/
-                setvalidpos(left, top, width, height);
-            }
-        });
-
-        mBinding.vBtn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //RxToast.showToast("调用函数======》》》底部按钮1");
-                try {
-                    //X1=5   手动IN
-                    byte[] cmd = new byte[6];
-                    cmd[0] = (byte) 0xA5;
-                    cmd[1] = (byte) 0x83;
-                    cmd[2] = (byte) 0x05;
-                    cmd[3] = (byte) 0x00;
-                    cmd[4] = (byte) 0x00;
-                    cmd[5] = (byte) 0x16;
-
-                    SerialPortTerminal.getInstance().whiteByte(cmd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
                 }
+//                setvalidpos(left, top, width, height);
             }
         });
-        mBinding.vBtn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //RxToast.showToast("调用函数======》》》底部按钮2");
-                try {
-                    //X1=6   手动OUT
-                    byte[] cmd = new byte[6];
-                    cmd[0] = (byte) 0xA5;
-                    cmd[1] = (byte) 0x83;
-                    cmd[2] = (byte) 0x06;
-                    cmd[3] = (byte) 0x00;
-                    cmd[4] = (byte) 0x00;
-                    cmd[5] = (byte) 0x16;
+        //按钮 ==> 底部按钮
+        mBinding.vBtn1.setOnClickListener(this);
+        mBinding.vBtn2.setOnClickListener(this);
+        mBinding.vBtn3.setOnClickListener(this);
+        mBinding.vBtn4.setOnClickListener(this);
+        mBinding.vBtn5.setOnClickListener(this);
+        //按钮 ==> 追边/追线
+        mBinding.vBtnZhuibian.setOnClickListener(this);
+        mBinding.vBtnZhuixian.setOnClickListener(this);
+        //按钮 ==> 亮度 +/-
+        mBinding.vBtnBrightnessMin.setOnClickListener(this);
+        mBinding.vBtnBrightnessAdd.setOnClickListener(this);
+        //按钮 ==> SET
+        mBinding.vBtnSet.setOnClickListener(this);
+        //按钮 ==> CAL
+        mBinding.vBtnCal.setOnClickListener(this);
 
-                    SerialPortTerminal.getInstance().whiteByte(cmd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        mBinding.vBtn3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //RxToast.showToast("调用函数======》》》底部按钮3");
-                try {
-                    //X1= 1  手动
-                    byte[] cmd = new byte[6];
-                    cmd[0] = (byte) 0xA5;
-                    cmd[1] = (byte) 0x83;
-                    cmd[2] = (byte) 0x01;
-                    cmd[3] = (byte) 0x00;
-                    cmd[4] = (byte) 0x00;
-                    cmd[5] = (byte) 0x16;
+    }
 
-                    SerialPortTerminal.getInstance().whiteByte(cmd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.v_btn1) {                        //底部按钮1~5 点击事件
+            SerialPortTerminal.getInstance().whiteBtn1();
+        } else if (id == R.id.v_btn2) {
+            SerialPortTerminal.getInstance().whiteBtn2();
+        } else if (id == R.id.v_btn3) {
+            SerialPortTerminal.getInstance().whiteBtn3();
+            //存储手动模式
+            currentSwitchControl = 0;
+            mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_3_normal);
+            SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_CONTROL, currentSwitchControl);
+        } else if (id == R.id.v_btn4) {
+            SerialPortTerminal.getInstance().whiteBtn4();
+            //存储自动模式
+            currentSwitchControl = 1;
+            mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_4_normal);
+            SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_CONTROL, currentSwitchControl);
+        } else if (id == R.id.v_btn5) {
+            SerialPortTerminal.getInstance().whiteBtn5();
+        } else if (id == R.id.v_btn_zhuibian) {         //追边
+            currentSwitchMode = 0;
+            mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
+            SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_MODE, currentSwitchMode);
+            //  通过JNI通知算法 追边模式
+            //  linedetection(0,0);
+        } else if (id == R.id.v_btn_zhuixian) {         //追线
+            currentSwitchMode = 1;
+            mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
+            SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_MODE, currentSwitchMode);
+            //  通过JNI通知算法 追线模式
+            //  linedetection(0,1);
+        } else if (id == R.id.v_btn_brightness_min) {    //亮度减小
+            if (currentBrightnessLevel > minBrightnessLevel) {
+                currentBrightnessLevel--;
+                SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
+                mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                //通过串口写入亮度值
+                SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
             }
-        });
-        mBinding.vBtn4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //RxToast.showToast("调用函数======》》》底部按钮4");
-                try {
-                    //X1=2   自动
-                    byte[] cmd = new byte[6];
-                    cmd[0] = (byte) 0xA5;
-                    cmd[1] = (byte) 0x83;
-                    cmd[2] = (byte) 0x02;
-                    cmd[3] = (byte) 0x00;
-                    cmd[4] = (byte) 0x00;
-                    cmd[5] = (byte) 0x16;
-
-                    SerialPortTerminal.getInstance().whiteByte(cmd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+        } else if (id == R.id.v_btn_brightness_add) {    //亮度增加
+            if (currentBrightnessLevel < maxBrightnessLevel) {
+                currentBrightnessLevel++;
+                SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
+                mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                //通过串口写入亮度值
+                SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
             }
-        });
-        mBinding.vBtn5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //RxToast.showToast("调用函数======》》》底部按钮5");
-                try {
-                    //X1=3   回中
-                    byte[] cmd = new byte[6];
-                    cmd[0] = (byte) 0xA5;
-                    cmd[1] = (byte) 0x83;
-                    cmd[2] = (byte) 0x03;
-                    cmd[3] = (byte) 0x00;
-                    cmd[4] = (byte) 0x00;
-                    cmd[5] = (byte) 0x16;
-
-                    SerialPortTerminal.getInstance().whiteByte(cmd);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        mBinding.vBtnSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isShowSetLayout = !isShowSetLayout;
-                isShowSetLayout(isShowSetLayout);
-            }
-        });
-        mBinding.vBtnCal.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isShowCalLayout = !isShowCalLayout;
-                isShowCalLayout(isShowCalLayout);
-            }
-        });
-        mBinding.vBtnBrightnessMin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (currentBrightnessLevel > minBrightnessLevel) {
-                    currentBrightnessLevel--;
-                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
-
-                    // send backlight brightness value to camera controller
-                    try {
-                        SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    //RxToast.showToast("Already the lowest");
-                }
-            }
-        });
-        mBinding.vBtnBrightnessAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (currentBrightnessLevel < maxBrightnessLevel) {
-                    currentBrightnessLevel++;
-                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
-
-                    // send backlight brightness value to camera controller
-                    try {
-                        SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    //RxToast.showToast("Already the highest");
-                }
-            }
-        });
-
-        mBinding.vBtnZhuibian.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentSwitchMode = 0;
-                mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
-                //RxToast.showToast("调用函数======》》》追边模式");
-                // send backlight brightness value to camera controller
-                try {
-                    SerialPortTerminal.getInstance().white("0x0010" + String.valueOf(currentBrightnessLevel));
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        mBinding.vBtnZhuixian.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentSwitchMode = 1;
-                mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
-                //RxToast.showToast("调用函数======》》》追线模式");
-            }
-        });
+        } else if (id == R.id.v_btn_set) {              //set
+            isShowSetLayout = !isShowSetLayout;
+            isShowSetLayout(isShowSetLayout);
+        } else if (id == R.id.v_btn_cal) {              //cal
+            isShowCalLayout = !isShowCalLayout;
+            isShowCalLayout(isShowCalLayout);
+        }
     }
 
     private void isShowSetLayout(boolean isShowSetLayout) {

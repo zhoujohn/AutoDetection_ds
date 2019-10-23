@@ -11,4 +11,5 @@ package com.frt.autodetection.constant;
 public interface AppInfo {
     String CURRENT_BRIGHTNESS_LEVEL = "current_brightness_level";
     String CURRENT_SWITCH_MODE = "current_switch_mode";
+    String CURRENT_SWITCH_CONTROL = "current_switch_control";
 }
