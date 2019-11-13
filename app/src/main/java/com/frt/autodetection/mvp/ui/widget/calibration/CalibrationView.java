@@ -298,6 +298,38 @@ public class CalibrationView extends View implements View.OnTouchListener {
     }
 
     /**
+     * 平移
+     *
+     */
+    public void translationBox(int devi) {
+        if(devi>0){
+            rect.left = rect.left + devi;
+            rect.right = rect.right + devi;
+        }else{
+            rect.left = rect.left - devi;
+            rect.right = rect.right - devi;
+        }
+        if (rect.left < 0) {
+            rect.left = 0;
+            rect.right = rect.left + viewWidth;
+        }
+        if (rect.right > getMeasuredWidth()) {
+            rect.right = getMeasuredWidth();
+            rect.left = rect.right - viewWidth;
+        }
+        if (rect.top < 0) {
+            rect.top = 0;
+            rect.bottom = rect.top + viewHeight;
+        }
+        if (rect.bottom > getMeasuredHeight()) {
+            rect.bottom = getMeasuredHeight();
+            rect.top = rect.bottom - viewHeight;
+        }
+        invalidate();
+    }
+
+
+    /**
      * 触摸点为上边缘
      *
      * @param v

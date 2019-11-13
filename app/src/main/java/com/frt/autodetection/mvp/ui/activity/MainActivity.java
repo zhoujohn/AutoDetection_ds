@@ -81,6 +81,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     @Override
     public int getLayoutId() {
+        setContentView( R.layout.activity_main);
         return R.layout.activity_main;
     }
 
@@ -103,7 +104,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
+        _cameraBridgeViewBase.setMaxFrameSize(1280, 640);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
         _cameraBridgeViewBase.setCalibrationType(0);
@@ -366,7 +367,15 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //Log.i(TAG, "XXXFrame index is:" + shift);
 
         // TODO: 1. show shift value and red_box on UI
-
+        //判断当前没有点击 CAL按钮 以及 devi不等于1000
+        if(!isShowCalLayout && devi!=1000){
+            mBinding.vCalibrationView.post(new Runnable() {
+                @Override
+                public void run() {
+                    mBinding.vCalibrationView.translationBox(devi);
+                }
+            });
+        }
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();
@@ -403,4 +412,5 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     // give calibration area information to native algorithms.
     public native void setvalidpos(float x, float y, float w, float h);
+
 }
