@@ -9,7 +9,7 @@ import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
+//import android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
@@ -25,6 +25,7 @@ import android.util.Range;
 import android.view.Surface;
 import android.view.ViewGroup.LayoutParams;
 
+import org.opencv.BuildConfig;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -48,8 +49,8 @@ public class JavaCamera2View extends CameraBridgeViewBase {
     private int mPreviewFormat = ImageFormat.YUV_420_888;
 
     private CameraDevice mCameraDevice;
-    //private CameraCaptureSession mCaptureSession;
-    private CameraConstrainedHighSpeedCaptureSession mCaptureSession;
+    private CameraCaptureSession mCaptureSession;
+    //private CameraConstrainedHighSpeedCaptureSession mCaptureSession;
     private CaptureRequest.Builder mPreviewRequestBuilder;
     private List<CaptureRequest> mPreviewRequestBuilder2;
     private String mCameraID;
@@ -183,12 +184,14 @@ public class JavaCamera2View extends CameraBridgeViewBase {
                     assert (planes[1].getPixelStride() == 2);
                     assert (planes[2].getPixelStride() == 2);
 
+                    if (BuildConfig.DEBUG)
+                        Log.d(LOGTAG, "Preview Frame received. Frame size: " + h + w);
                     ByteBuffer y_plane = planes[0].getBuffer();
                     ByteBuffer uv_plane = planes[1].getBuffer();
                     Mat y_mat = new Mat(h, w, CvType.CV_8UC1, y_plane);
                     Mat uv_mat = new Mat(h / 2, w / 2, CvType.CV_8UC2, uv_plane);
                     JavaCamera2Frame tempFrame = new JavaCamera2Frame(y_mat, uv_mat, w, h);
-                    deliverAndDrawFrame(tempFrame);
+                    deliverAndDrawFrame(tempFrame, 0);
                     tempFrame.release();
                     image.close();
                 }
@@ -196,24 +199,28 @@ public class JavaCamera2View extends CameraBridgeViewBase {
             Surface surface = mImageReader.getSurface();
 
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            //mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_ZERO_SHUTTER_LAG);
             mPreviewRequestBuilder.addTarget(surface);
 
-            //mCameraDevice.createCaptureSession(Arrays.asList(surface),
-            mCameraDevice.createConstrainedHighSpeedCaptureSession(Arrays.asList(surface),
+            mCameraDevice.createCaptureSession(Arrays.asList(surface),
+            //mCameraDevice.createConstrainedHighSpeedCaptureSession(Arrays.asList(surface),
                 new CameraCaptureSession.StateCallback() {
                     @Override
                     public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                        Log.i(LOGTAG, "createConstrainedHighSpeedCaptureSession::onConfigured");
+                        //Log.i(LOGTAG, "createConstrainedHighSpeedCaptureSession::onConfigured");
+                        Log.i(LOGTAG, "createCaptureSession::onConfigured");
                         if (null == mCameraDevice) {
                             return; // camera is already closed
                         }
-                        mCaptureSession
-                                = (CameraConstrainedHighSpeedCaptureSession)cameraCaptureSession;
+                        //mCaptureSession
+                        //        = (CameraConstrainedHighSpeedCaptureSession)cameraCaptureSession;
+                        mCaptureSession = cameraCaptureSession;
                         try {
                             //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                             //        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                             //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
                             //        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+                            //mPreviewRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, FALSE);
                             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_MODE,
                                     CaptureRequest.CONTROL_MODE_OFF);
                             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
@@ -223,11 +230,10 @@ public class JavaCamera2View extends CameraBridgeViewBase {
                             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE,
                                     CaptureRequest.CONTROL_AWB_MODE_OFF);
                             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,
-                                    Range.create(20000,21000));
+                                    Range.create(150000,210000));
 
-
-                            //mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
-                            mPreviewRequestBuilder2 = mCaptureSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
+                            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), null, mBackgroundHandler);
+                            //mPreviewRequestBuilder2 = mCaptureSession.createHighSpeedRequestList(mPreviewRequestBuilder.build());
                             mCaptureSession.setRepeatingBurst(mPreviewRequestBuilder2, null, mBackgroundHandler);
                             Log.i(LOGTAG, "CameraPreviewSession has been started");
                         } catch (Exception e) {
@@ -278,7 +284,9 @@ public class JavaCamera2View extends CameraBridgeViewBase {
         CameraManager manager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
         try {
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(mCameraID);
+            int hardwareLevel=characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            Log.d(LOGTAG, "hardwarelevel: " + hardwareLevel);
             int bestWidth = 0, bestHeight = 0;
             float aspect = (float) width / height;
             android.util.Size[] sizes = map.getOutputSizes(ImageReader.class);
@@ -293,6 +301,8 @@ public class JavaCamera2View extends CameraBridgeViewBase {
                     bestHeight = h;
                 }
             }
+            bestWidth = 640;
+            bestHeight = 200;
             Log.i(LOGTAG, "best size: " + bestWidth + "x" + bestHeight);
             assert(!(bestWidth == 0 || bestHeight == 0));
             if (mPreviewSize.getWidth() == bestWidth && mPreviewSize.getHeight() == bestHeight)

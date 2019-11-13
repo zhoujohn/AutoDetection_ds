@@ -972,6 +972,7 @@ public class Mat {
 
     // javadoc:Mat::put(row,col,data)
     public int put(int row, int col, int[] data) {
+
         int t = type();
         if (data == null || data.length % CvType.channels(t) != 0)
             throw new java.lang.UnsupportedOperationException(

@@ -56,6 +56,12 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int RGBA = 1;
     public static final int GRAY = 2;
 
+    public int mCalType = 0; //line tracking: (0: line tracking; 1: edge tracking)
+    public int mROIx = 250;
+    public int mROIy = 80;
+    public int mROIw = 140;
+    public int mROIh = 40;
+
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
         mCameraIndex = cameraId;
@@ -81,6 +87,18 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         mMaxHeight = MAX_UNSPECIFIED;
         styledAttrs.recycle();
     }
+
+    public void setCalibrationType(int type) {
+        mCalType = type;
+    }
+
+    public void setROI(int x, int y, int width, int height) {
+        mROIx = x;
+        mROIy = y;
+        mROIw = width;
+        mROIh = height;
+    }
+
 
     /**
      * Sets the camera index
@@ -110,7 +128,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
          * The returned values - is a modified frame which needs to be displayed on the screen.
          * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
          */
-        public Mat onCameraFrame(Mat inputFrame);
+        public Mat onCameraFrame(Mat inputFrame, int devi);
+
+        public void onTargetDeviation(int devi);
     }
 
     public interface CvCameraViewListener2 {
@@ -133,7 +153,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
          * The returned values - is a modified frame which needs to be displayed on the screen.
          * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
          */
-        public Mat onCameraFrame(CvCameraViewFrame inputFrame);
+        public Mat onCameraFrame(CvCameraViewFrame inputFrame, int devi);
+
+        public void onTargetDeviation(int devi);
     };
 
     protected class CvCameraViewListenerAdapter implements CvCameraViewListener2  {
@@ -149,20 +171,24 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             mOldStyleListener.onCameraViewStopped();
         }
 
-        public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+        public Mat onCameraFrame(CvCameraViewFrame inputFrame, int devi) {
              Mat result = null;
              switch (mPreviewFormat) {
                 case RGBA:
-                    result = mOldStyleListener.onCameraFrame(inputFrame.rgba());
+                    result = mOldStyleListener.onCameraFrame(inputFrame.rgba(), devi);
                     break;
                 case GRAY:
-                    result = mOldStyleListener.onCameraFrame(inputFrame.gray());
+                    result = mOldStyleListener.onCameraFrame(inputFrame.gray(), devi);
                     break;
                 default:
                     Log.e(TAG, "Invalid frame format! Only RGBA and Gray Scale are supported!");
             };
 
             return result;
+        }
+
+        public void onTargetDeviation(int devi) {
+            mOldStyleListener.onTargetDeviation(devi);
         }
 
         public void setFrameFormat(int format) {
@@ -386,11 +412,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
      * then displayed on the screen.
      * @param frame - the current frame to be delivered
      */
-    protected void deliverAndDrawFrame(CvCameraViewFrame frame) {
+    protected void deliverAndDrawFrame(CvCameraViewFrame frame, int devi) {
         Mat modified;
 
         if (mListener != null) {
-            modified = mListener.onCameraFrame(frame);
+            modified = mListener.onCameraFrame(frame, devi);
         } else {
             modified = frame.rgba();
         }
@@ -456,6 +482,12 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected void AllocateCache()
     {
         mCacheBitmap = Bitmap.createBitmap(mFrameWidth, mFrameHeight, Bitmap.Config.ARGB_8888);
+    }
+
+    protected void setInternalDeviation(int devi) {
+        if (mListener != null) {
+            mListener.onTargetDeviation(devi);
+        }
     }
 
     public interface ListItemAccessor {

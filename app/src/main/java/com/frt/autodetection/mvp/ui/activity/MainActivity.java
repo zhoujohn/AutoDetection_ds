@@ -35,7 +35,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     private static final String TAG = "OCVSample::Activity";
     private CameraBridgeViewBase _cameraBridgeViewBase;
     private int index = 0;
-    private int shift = 0;
+    //private int shift = 0;
     private int show = 0;
     private int offsetValue = 0;
 
@@ -106,6 +106,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         _cameraBridgeViewBase.setMaxFrameSize(640, 200);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
+        _cameraBridgeViewBase.setCalibrationType(0);
+        _cameraBridgeViewBase.setROI(250, 80, 140, 40);
         _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
     }
 
@@ -353,31 +355,18 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     // valid interface start here.
     //////////////////////////////////////
     // Camera Frame rendering and CV algorithm interface.
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame, int devi) {
         index++;
-        Log.i(TAG, "Frame index is:" + index + "...time is:" + System.currentTimeMillis());
+        Log.i(TAG, "Frame index is:" + index + "deviation is:"+ devi + "...time is:" + System.currentTimeMillis());
 
         //////////////////////////////////////////////////
         // send frame to CV algorithm
-        Mat matGray = inputFrame.gray();
-        shift = linedetection(matGray.getNativeObjAddr(), 400);
-        Log.i(TAG, "XXXFrame index is:" + shift);
+        //Mat matGray = inputFrame.gray();
+        //shift = linedetection(matGray.getNativeObjAddr(), 400);
+        //Log.i(TAG, "XXXFrame index is:" + shift);
 
         // TODO: 1. show shift value and red_box on UI
-        // send shift value to controller
-        try {
-            int absShift = (shift > 0) ? shift : -shift;
-            String index;
-            if (shift > 0) {
-                index = "0x0050";
-            } else {
-                index = "0x0060";
-            }
-            SerialPortTerminal.getInstance().white(index + absShift);
-            Log.i(TAG, "Shift value of SERIAL is:" + index + absShift);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();
@@ -387,6 +376,25 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         return matOrigin;
         //}
         //return null;
+    }
+
+    public void onTargetDeviation(int devi)
+    {
+        Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
+        // send shift value to controller
+        try {
+            int absShift = (devi > 0) ? devi : -devi;
+            String index;
+            if (devi > 0) {
+                index = "0x0050";
+            } else {
+                index = "0x0060";
+            }
+            SerialPortTerminal.getInstance().white(index + absShift);
+            Log.i(TAG, "Shift value of SERIAL is:" + index + absShift);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     // start detection of line

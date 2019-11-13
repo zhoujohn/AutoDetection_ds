@@ -13,9 +13,13 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 import org.opencv.BuildConfig;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 /**
@@ -33,7 +37,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     private static final String TAG = "JavaCameraView";
 
     private byte mBuffer[];
-    private Mat[] mFrameChain;
+    //private Mat[] mFrameChain;
+    private StorageFrame[] mFrameChain;
     private int mChainIdx = 0;
     private Thread mThread;
     private boolean mStopThread;
@@ -42,6 +47,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     protected JavaCameraFrame[] mCameraFrame;
     private SurfaceTexture mSurfaceTexture;
     private int mPreviewFormat = ImageFormat.NV21;
+
+    private int mFrameIdx = 0;
 
     public static class JavaCameraSizeAccessor implements ListItemAccessor {
 
@@ -64,6 +71,16 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     public JavaCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public class StorageFrame{
+        int devi = 0;
+
+        Mat mat;
+
+        StorageFrame() {
+            mat = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
+        }
     }
 
     protected boolean initializeCamera(int width, int height) {
@@ -195,15 +212,22 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCamera.addCallbackBuffer(mBuffer);
                     mCamera.setPreviewCallbackWithBuffer(this);
 
-                    mFrameChain = new Mat[2];
-                    mFrameChain[0] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
-                    mFrameChain[1] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
+                    //mFrameChain = new Mat[2];
+                    //mFrameChain[0] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
+                    //mFrameChain[1] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
+                    mFrameChain = new StorageFrame[2];
+                    mFrameChain[0] = new StorageFrame();
+                    mFrameChain[1] = new StorageFrame();
+                    //mFrameChain[0].mat = new Mat;
+                    //mFrameChain[1].mat = new Mat;
+                    //mFrameChain[0].mat = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
+                    //mFrameChain[1].mat = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
 
                     AllocateCache();
 
                     mCameraFrame = new JavaCameraFrame[2];
-                    mCameraFrame[0] = new JavaCameraFrame(mFrameChain[0], mFrameWidth, mFrameHeight);
-                    mCameraFrame[1] = new JavaCameraFrame(mFrameChain[1], mFrameWidth, mFrameHeight);
+                    mCameraFrame[0] = new JavaCameraFrame(mFrameChain[0].mat, mFrameWidth, mFrameHeight);
+                    mCameraFrame[1] = new JavaCameraFrame(mFrameChain[1].mat, mFrameWidth, mFrameHeight);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                         mSurfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
@@ -236,8 +260,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
             }
             mCamera = null;
             if (mFrameChain != null) {
-                mFrameChain[0].release();
-                mFrameChain[1].release();
+                mFrameChain[0].mat.release();
+                mFrameChain[1].mat.release();
             }
             if (mCameraFrame != null) {
                 mCameraFrame[0].release();
@@ -299,15 +323,73 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
+        mFrameIdx++;
         if (BuildConfig.DEBUG)
-            Log.d(TAG, "Preview Frame received. Frame size: " + frame.length);
+            Log.d(TAG, "Preview Frame received. Frame size: " + mFrameIdx);
         synchronized (this) {
-            mFrameChain[mChainIdx].put(0, 0, frame);
+            mFrameChain[mChainIdx].mat.put(0, 0, frame);
             mCameraFrameReady = true;
             this.notify();
+            int devi = calDeviation(mFrameChain[mChainIdx].mat, mCalType);
+            mFrameChain[mChainIdx].devi = devi;
+            // to keep the same with image show and deviation result, we must save deviation in onCameraFrame(activity)
+
+
+            // send deviation to UI layer, which is used to send it through UART to controller
+            setInternalDeviation(devi);
         }
         if (mCamera != null)
             mCamera.addCallbackBuffer(mBuffer);
+    }
+
+    private int calDeviation(Mat frame, int type) {
+        if (type == 0) {
+            return calDeviation_adap1(frame);
+        } else if (type == 1) {
+            return calDeviation_adap1(frame);
+        } else {
+            return calDeviation_adap1(frame);
+        }
+    }
+
+    private int calDeviation_adap1(Mat frame) {
+        int devi = 1000;
+
+        Rect rect = new Rect(mROIx, mROIy, mROIw, mROIh);
+        Mat roi = new Mat(frame, rect);
+
+        Mat gray  = roi.submat(0,mROIh,0,mROIw);
+        Mat target = gray.clone();
+        Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        Mat thresholdImg = target.clone();
+        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, -3);
+        Mat sobelImg = thresholdImg.clone();
+        Imgproc.Sobel(thresholdImg,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
+        Mat storage = new Mat();
+        Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI/60, 36, 36,1);
+        for (int x = 0; x < storage.rows(); x++)
+        {
+            double[] vec = storage.get(x, 0);
+            double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
+            devi = (int)x1;
+            //Point start = new Point(x1, y1);
+            //Point end = new Point(x2, y2);
+            //Imgproc.line(frame, start, end, new Scalar(255, 255, 255, 255), 1, Imgproc.LINE_4, 0);
+        }
+
+        //Imgproc.cvtColor(roi, gray, Imgproc.COLOR_RGB2GRAY);
+        //threshold
+        //sobel ---> x
+        //get line detection
+        //get position of line ---> x
+
+
+        roi.release();
+        target.release();
+        thresholdImg.release();
+        sobelImg.release();
+        storage.release();
+        return devi;
     }
 
     private class JavaCameraFrame implements CvCameraViewFrame {
@@ -369,8 +451,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                 }
 
                 if (!mStopThread && hasFrame) {
-                    if (!mFrameChain[1 - mChainIdx].empty())
-                        deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
+                    if (!mFrameChain[1 - mChainIdx].mat.empty())
+                        deliverAndDrawFrame(mCameraFrame[1 - mChainIdx],mFrameChain[1 - mChainIdx].devi);
                 }
             } while (!mStopThread);
             Log.d(TAG, "Finish processing thread");
