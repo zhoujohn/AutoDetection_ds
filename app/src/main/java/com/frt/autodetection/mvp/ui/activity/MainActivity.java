@@ -81,7 +81,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     @Override
     public int getLayoutId() {
-        setContentView( R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         return R.layout.activity_main;
     }
 
@@ -104,7 +104,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
+//        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
+        _cameraBridgeViewBase.setMaxFrameSize(1280, 640);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
         _cameraBridgeViewBase.setCalibrationType(0);
@@ -162,7 +163,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 offsetValue = value;
                 mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
 
-                if (value > 0) {
+                /*if (value > 0) {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText(value + "");
                 } else if (value < 0) {
@@ -171,8 +172,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 } else {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
-                }
-                _cameraBridgeViewBase.setROI((int)left, (int)top, (int)width, (int)height);
+                }*/
+//                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height);
 //                setvalidpos(left, top, width, height);
             }
         });
@@ -359,7 +360,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     // Camera Frame rendering and CV algorithm interface.
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame, int devi) {
         index++;
-        Log.i(TAG, "Frame index is:" + index + "deviation is:"+ devi + "...time is:" + System.currentTimeMillis());
+        Log.i(TAG, "Frame index is:" + index + "deviation is:" + devi + "...time is:" + System.currentTimeMillis());
 
         //////////////////////////////////////////////////
         // send frame to CV algorithm
@@ -369,11 +370,22 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         // TODO: 1. show shift value and red_box on UI
         //判断当前没有点击 CAL按钮 以及 devi不等于1000
-        if(!isShowCalLayout && devi!=1000){
+        if (!isShowCalLayout && devi != 1000) {
             mBinding.vCalibrationView.post(new Runnable() {
                 @Override
                 public void run() {
                     mBinding.vCalibrationView.translationBox(devi);
+                    if (devi > 0) {
+                        mBinding.vLeftTv.setText("0");
+                        mBinding.vRightTv.setText(devi + "");
+                    } else if (devi < 0) {
+                        mBinding.vLeftTv.setText(devi + "");
+                        mBinding.vRightTv.setText("0");
+                    } else {
+                        mBinding.vLeftTv.setText("0");
+                        mBinding.vRightTv.setText("0");
+                    }
+
                 }
             });
         }
@@ -388,8 +400,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //return null;
     }
 
-    public void onTargetDeviation(int devi)
-    {
+    public void onTargetDeviation(int devi) {
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
         // send shift value to controller
         try {

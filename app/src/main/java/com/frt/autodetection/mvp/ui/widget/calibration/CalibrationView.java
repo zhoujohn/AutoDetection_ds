@@ -26,11 +26,14 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.frt.autodetection.R;
+import com.frt.autodetection.constant.AppInfo;
+import com.frt.autodetection.utils.helper.SpHelper;
 
 /*
  * Modified from version in AOSP.
@@ -41,6 +44,7 @@ import com.frt.autodetection.R;
  * space to screen space.
  */
 public class CalibrationView extends View implements View.OnTouchListener {
+    public final String TAG = "CalibrationView";
     protected int screenWidth;
     protected int screenHeight;
     protected int lastX;
@@ -90,6 +94,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
 
     private boolean isTouch;
 
+    private boolean isFirstOnMeasure = true;
+
     /**
      * 初始化获取屏幕宽高
      */
@@ -97,13 +103,24 @@ public class CalibrationView extends View implements View.OnTouchListener {
         screenHeight = 600;
         screenWidth = 1280;
         TypedValue outValue = new TypedValue();
-
+        rect = new RectF();
 
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CalibrationView);
         try {
-            viewWidth = attributes.getDimension(R.styleable.CalibrationView_baseWidth, DEFAULT_VIEW_WIDTH);
-            aspectRatio = attributes.getFloat(R.styleable.CalibrationView_aspectRatio, DEFAULT_ASPECT_RATIO);
-            viewHeight = viewWidth / aspectRatio;
+            //存储规则 "left,top,width,height,centerX"
+            String cacheParam = SpHelper.getInstance().getString(AppInfo.MARK_POINT, "");
+            if (cacheParam != null && !cacheParam.equals("")) {
+                String[] cacheParamArr = cacheParam.split(",");
+                viewWidth = Float.parseFloat(cacheParamArr[2]);
+                viewHeight = Float.parseFloat(cacheParamArr[3]);
+                Log.d(TAG, "initScreenW_H: 有缓存：viewWidth = " + viewWidth + ",viewHeight =" + viewHeight);
+            } else {
+                viewWidth = attributes.getDimension(R.styleable.CalibrationView_baseWidth, DEFAULT_VIEW_WIDTH);
+                aspectRatio = attributes.getFloat(R.styleable.CalibrationView_aspectRatio, DEFAULT_ASPECT_RATIO);
+                viewHeight = viewWidth / aspectRatio;
+                Log.d(TAG, "initScreenW_H: 无缓存：viewWidth = " + viewWidth + ",viewHeight =" + viewHeight);
+            }
+
             maxHeight = maxWidth / aspectRatio;
 
             borderColor = attributes.getColor(R.styleable.CalibrationView_borderColor, DEFAULT_BORDER_COLOR);
@@ -146,9 +163,20 @@ public class CalibrationView extends View implements View.OnTouchListener {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        rect = new RectF();
-        rect.left = getMeasuredWidth() / 2 - viewWidth / 2;
-        rect.top = getMeasuredHeight() / 2 - viewHeight / 2;
+        //存储规则 "left,top,width,height"
+        String cacheParam = SpHelper.getInstance().getString(AppInfo.MARK_POINT, "");
+        if (cacheParam != null && !cacheParam.equals("") && isFirstOnMeasure) {
+            String[] cacheParamArr = cacheParam.split(",");
+            rect.left = Float.parseFloat(cacheParamArr[0]);
+            rect.top = Float.parseFloat(cacheParamArr[1]);
+            Log.d(TAG, "onMeasure: 有缓存 且第一次 isFirstOnMeasure");
+            isFirstOnMeasure = false;
+        } else {
+            if (isFirstOnMeasure) {
+                rect.left = getMeasuredWidth() / 2 - viewWidth / 2;
+                rect.top = getMeasuredHeight() / 2 - viewHeight / 2;
+            }
+        }
         rect.right = rect.left + viewWidth;
         rect.bottom = rect.top + viewHeight;
     }
@@ -294,18 +322,31 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.bottom = getMeasuredHeight();
             rect.top = rect.bottom - viewHeight;
         }
+        String markPoint = rect.left + "," + rect.top + "," + viewWidth + "," + viewHeight;
+        Log.d(TAG, "center: 存储拖动过的 值：" + markPoint);
+        SpHelper.getInstance().putString(AppInfo.MARK_POINT, markPoint);
         invalidate();
     }
 
     /**
      * 平移
-     *
      */
     public void translationBox(int devi) {
-        if(devi>0){
+        //存储规则 "left,top,width,height"
+        String cacheParam = SpHelper.getInstance().getString(AppInfo.MARK_POINT, "");
+
+
+        if (cacheParam != null && !cacheParam.equals("")) {
+            String[] cacheParamArr = cacheParam.split(",");
+            rect.left = Float.parseFloat(cacheParamArr[0]);
+            rect.right = rect.left + Float.parseFloat(cacheParamArr[2]);
+
+        }
+
+        if (devi > 0) {
             rect.left = rect.left + devi;
             rect.right = rect.right + devi;
-        }else{
+        } else {
             rect.left = rect.left - devi;
             rect.right = rect.right - devi;
         }
