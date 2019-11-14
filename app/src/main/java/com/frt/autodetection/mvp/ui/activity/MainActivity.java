@@ -104,7 +104,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
-        _cameraBridgeViewBase.setMaxFrameSize(1280, 640);
+        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
         _cameraBridgeViewBase.setCalibrationType(0);
@@ -172,6 +172,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }
+                _cameraBridgeViewBase.setROI((int)left, (int)top, (int)width, (int)height);
 //                setvalidpos(left, top, width, height);
             }
         });

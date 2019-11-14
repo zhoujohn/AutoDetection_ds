@@ -355,7 +355,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     private int calDeviation_adap1(Mat frame) {
         int devi = 1000;
 
-        Rect rect = new Rect(mROIx, mROIy, mROIw, mROIh);
+        Rect rect = new Rect(mROIx_s, mROIy, mROIw, mROIh);
         Mat roi = new Mat(frame, rect);
 
         Mat gray  = roi.submat(0,mROIh,0,mROIw);
@@ -382,6 +382,22 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         //sobel ---> x
         //get line detection
         //get position of line ---> x
+
+        // change devi to fit camera frame position
+        int rel_devi = 0;
+        if (devi != 1000) {
+            rel_devi = mROIx + devi; // add shift value, get abstract value of shift, regarding to original frame point
+            devi = rel_devi - mROIx - mROIw/2; // get relative shift to center of value
+
+            // update roi position, only update mROIx since it is the only variety of the four variables
+            mROIx_s = mROIx_s + devi;
+            if (mROIx_s < 0) {
+                mROIx_s = 0;
+            } else if (mROIx_s > (640 - mROIx_s)) {
+                mROIx_s = 640 - mROIx_s;
+            }
+
+        }
 
 
         roi.release();
