@@ -87,7 +87,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private boolean isShowLine;
 
 
-    private float DEFAULT_VIEW_WIDTH = 100;
+    private float DEFAULT_VIEW_WIDTH = 120;
     private float DEFAULT_ASPECT_RATIO = 2;
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;

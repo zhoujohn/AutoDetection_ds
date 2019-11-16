@@ -355,6 +355,11 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     private int calDeviation_adap1(Mat frame) {
         int devi = 1000;
 
+        // settings of ROI is not ready
+        if (mStartWork == 0) {
+            return devi;
+        }
+
         Rect rect = new Rect(mROIx_s, mROIy, mROIw, mROIh);
         Mat roi = new Mat(frame, rect);
 

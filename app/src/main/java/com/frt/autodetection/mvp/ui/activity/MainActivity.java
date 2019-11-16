@@ -102,14 +102,15 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         _cameraBridgeViewBase = findViewById(R.id.main_surface);
 
+        _cameraBridgeViewBase.setCalibrationType(0);
+       // _cameraBridgeViewBase.setROI(250, 80, 140, 40);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
 //        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
-        _cameraBridgeViewBase.setMaxFrameSize(1280, 640);
+        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
-        _cameraBridgeViewBase.setCalibrationType(0);
-        _cameraBridgeViewBase.setROI(250, 80, 140, 40);
+
         _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
     }
 
@@ -161,7 +162,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             @Override
             public void OnOffsetChange(int value, float left, float top, float width, float height) {
                 offsetValue = value;
-                mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
+                //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
 
                 /*if (value > 0) {
                     mBinding.vLeftTv.setText("0");
@@ -173,7 +174,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }*/
-//                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height);
+                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height);
 //                setvalidpos(left, top, width, height);
             }
         });

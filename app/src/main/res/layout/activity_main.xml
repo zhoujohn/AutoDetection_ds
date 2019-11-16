@@ -59,8 +59,8 @@
                 <!--android:layout_height="200px"-->
                 <org.opencv.android.JavaCameraView
                     android:id="@+id/main_surface"
-                    android:layout_width="1280px"
-                    android:layout_height="640px"
+                    android:layout_width="640px"
+                    android:layout_height="200px"
                     android:background="@color/transparent"/>
 
                 <ImageView
@@ -74,8 +74,8 @@
 
             <com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView
                 android:id="@+id/v_calibration_view"
-                android:layout_width="1280px"
-                android:layout_height="640px"
+                android:layout_width="640px"
+                android:layout_height="200px"
                 android:layout_centerInParent="true"
                 android:clickable="true"
                 android:focusable="true"

@@ -57,6 +57,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int GRAY = 2;
 
     public int mCalType = 0; //line tracking: (0: line tracking; 1: edge tracking)
+    public int mStartWork = 0;
     public int mROIx = 250;
     public int mROIx_s = 250;
     public int mROIy = 80;
@@ -94,11 +95,14 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     public void setROI(int x, int y, int width, int height) {
-        mROIx = x;
-        mROIx_s = mROIx;
-        mROIy = y;
-        mROIw = width;
-        mROIh = height;
+        synchronized (mSyncObject) {
+            mStartWork = 1;
+            mROIx = x;
+            mROIx_s = mROIx;
+            mROIy = y;
+            mROIw = width;
+            mROIh = height;
+        }
     }
 
 
