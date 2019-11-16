@@ -94,7 +94,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         mCalType = type;
     }
 
-    public void setROI(int x, int y, int width, int height) {
+    public void setROI(int x, int y, int width, int height,int type) {
         synchronized (mSyncObject) {
             mStartWork = 1;
             mROIx = x;

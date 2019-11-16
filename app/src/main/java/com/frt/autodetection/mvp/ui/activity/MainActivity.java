@@ -2,6 +2,7 @@ package com.frt.autodetection.mvp.ui.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -160,7 +161,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     public void setListener() {
         mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
             @Override
-            public void OnOffsetChange(int value, float left, float top, float width, float height) {
+            public void OnOffsetChange(int value, float left, float top, float width, float height,int type) {
                 offsetValue = value;
                 //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
 
@@ -174,7 +175,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }*/
-                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height);
+                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height,type);
 //                setvalidpos(left, top, width, height);
             }
         });
@@ -371,25 +372,29 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
         // TODO: 1. show shift value and red_box on UI
         //判断当前没有点击 CAL按钮 以及 devi不等于1000
-        if (!isShowCalLayout && devi != 1000) {
+//        if (!isShowCalLayout && devi != 1000) {
+        //现在的逻辑是始终显示devi的值
+        if (!isShowCalLayout && devi!=1000) {
             mBinding.vCalibrationView.post(new Runnable() {
                 @Override
                 public void run() {
                     mBinding.vCalibrationView.translationBox(devi);
-                    if (devi > 0) {
-                        mBinding.vLeftTv.setText("0");
-                        mBinding.vRightTv.setText(devi + "");
-                    } else if (devi < 0) {
-                        mBinding.vLeftTv.setText(devi + "");
-                        mBinding.vRightTv.setText("0");
-                    } else {
-                        mBinding.vLeftTv.setText("0");
-                        mBinding.vRightTv.setText("0");
-                    }
-
                 }
             });
         }
+
+        mBinding.vTargetInfo.post(new Runnable() {
+            @Override
+            public void run() {
+                if (devi !=1000) {
+                    mBinding.vTargetInfo.setTextColor(Color.WHITE);
+                    mBinding.vTargetInfo.setText(devi+"");
+                }else{
+                    mBinding.vTargetInfo.setTextColor(Color.RED);
+                    mBinding.vTargetInfo.setText("NO TARGET");
+                }
+            }
+        });
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();

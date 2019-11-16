@@ -95,6 +95,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private boolean isTouch;
 
     private boolean isFirstOnMeasure = true;
+    private int setRoiType = 1;
 
     /**
      * 初始化获取屏幕宽高
@@ -156,7 +157,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     }
 
     public interface OnOffsetChangeListener {
-        void OnOffsetChange(int value, float left, float top, float width, float height);
+        void OnOffsetChange(int value, float left, float top, float width, float height,int type);
     }
 
 
@@ -220,7 +221,9 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 case 1:
                     if (mOnOffsetChangeListener != null) {
                         int value = (int) (rect.centerX() - getMeasuredWidth() / 2);
-                        mOnOffsetChangeListener.OnOffsetChange(value, rect.left, rect.top, rect.width(), rect.height());
+                        Log.d("setRoiType = ", "handleMessage: "+setRoiType);
+                        mOnOffsetChangeListener.OnOffsetChange(value, rect.left, rect.top, rect.width(), rect.height(),setRoiType);
+                        setRoiType = 0;
                     }
                     break;
             }
@@ -272,6 +275,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 } else {
                     if (value - baseValue >= 10 || value - baseValue <= -10) {
                         float scale = value / baseValue;// 当前两点间的距离除以手指落下时两点间的距离就是需要缩放的比例。
+                        setRoiType = 1;
                         scaleRect(scale);
                         scaleTime = System.currentTimeMillis();
                     }
@@ -283,8 +287,10 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 float y = event.getRawY();
                 x -= last_x;
                 y -= last_y;
-                if (x >= 10 || y >= 10 || x <= -10 || y <= -10)
+                if (x >= 10 || y >= 10 || x <= -10 || y <= -10){
+                    setRoiType = 1;
                     center(x, y);
+                }
                 last_x = event.getRawX();
                 last_y = event.getRawY();
             }
