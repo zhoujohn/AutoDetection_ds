@@ -1,9 +1,12 @@
 package com.frt.autodetection.mvp.ui.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -104,7 +107,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         _cameraBridgeViewBase = findViewById(R.id.main_surface);
 
         _cameraBridgeViewBase.setCalibrationType(0);
-       // _cameraBridgeViewBase.setROI(250, 80, 140, 40);
+        // _cameraBridgeViewBase.setROI(250, 80, 140, 40);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
 //        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
@@ -161,7 +164,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     public void setListener() {
         mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
             @Override
-            public void OnOffsetChange(int value, float left, float top, float width, float height,int type) {
+            public void OnOffsetChange(int value, float left, float top, float width, float height, int type) {
                 offsetValue = value;
                 //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
 
@@ -175,7 +178,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
                 }*/
-                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height,type);
+                _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height, type);
 //                setvalidpos(left, top, width, height);
             }
         });
@@ -374,7 +377,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //判断当前没有点击 CAL按钮 以及 devi不等于1000
 //        if (!isShowCalLayout && devi != 1000) {
         //现在的逻辑是始终显示devi的值
-        if (!isShowCalLayout && devi!=1000) {
+        if (!isShowCalLayout && devi != 1000) {
             mBinding.vCalibrationView.post(new Runnable() {
                 @Override
                 public void run() {
@@ -382,19 +385,14 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 }
             });
         }
-
-        mBinding.vTargetInfo.post(new Runnable() {
+        this.devi = devi;
+        mHandler.sendEmptyMessage(1);
+        /*mBinding.vTargetInfo.post(new Runnable() {
             @Override
             public void run() {
-                if (devi !=1000) {
-                    mBinding.vTargetInfo.setTextColor(Color.WHITE);
-                    mBinding.vTargetInfo.setText(devi+"");
-                }else{
-                    mBinding.vTargetInfo.setTextColor(Color.RED);
-                    mBinding.vTargetInfo.setText("NO TARGET");
-                }
+
             }
-        });
+        });*/
 
         // Show Frame on target area.
         Mat matOrigin = inputFrame.rgba();
@@ -405,6 +403,26 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //}
         //return null;
     }
+
+    private int devi;
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    mHandler.removeMessages(1);
+                    if (devi != 1000) {
+                        mBinding.vTargetInfo.setTextColor(Color.WHITE);
+                        mBinding.vTargetInfo.setText(devi + "");
+                    } else {
+                        mBinding.vTargetInfo.setTextColor(Color.RED);
+                        mBinding.vTargetInfo.setText("NO TARGET");
+                    }
+                    break;
+            }
+        }
+    };
 
     public void onTargetDeviation(int devi) {
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
