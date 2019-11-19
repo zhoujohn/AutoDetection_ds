@@ -58,6 +58,48 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     //亮度level值 分7段
     private int[] brightnessArr = {14, 28, 42, 56, 70, 84, 100};
 
+    private int devi;
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 1:
+                    // 1）获取亮度值
+                    currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 5);
+                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                    //初始化设置亮度
+                    SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
+
+                    // 2）或者追边/追线模式
+                    currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
+                    mBinding.vTopBtn1.setImageResource(currentSwitchMode == 0 ? R.drawable.icon_zhuibian_white : R.drawable.icon_zhuixian_white);
+                    //  通过JNI通知算法 追边模式
+                    //  linedetection(0,currentSwitchMode);
+
+                    // 3）手动/自动
+                    currentSwitchControl = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_CONTROL, 0);
+                    mBinding.vTopBtn2.setImageResource(currentSwitchControl == 0 ? R.drawable.bottom_btn_3_normal : R.drawable.bottom_btn_4_normal);
+                    if (currentSwitchControl == 0) {
+                        SerialPortTerminal.getInstance().whiteBtn3();
+                    } else {
+                        SerialPortTerminal.getInstance().whiteBtn4();
+                    }
+                    break;
+                case 2:
+                    mHandler.removeMessages(2);
+                    if (devi != 1000) {
+                        mBinding.vTargetInfo.setTextColor(Color.WHITE);
+                        mBinding.vTargetInfo.setText((devi - 320) / 3 + "");
+                    } else {
+                        mBinding.vTargetInfo.setTextColor(Color.RED);
+                        mBinding.vTargetInfo.setText("NO TARGET");
+                    }
+                    break;
+            }
+        }
+    };
+
 
     private BaseLoaderCallback _baseLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -131,26 +173,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
      * ========================================================
      */
     protected void initParamData() {
-        // 1）获取亮度值
-        currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 5);
-        mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
-        //初始化设置亮度
-        SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel-1]);
-
-        // 2）或者追边/追线模式
-        currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
-        mBinding.vTopBtn1.setImageResource(currentSwitchMode == 0 ? R.drawable.icon_zhuibian_white : R.drawable.icon_zhuixian_white);
-        //  通过JNI通知算法 追边模式
-        //  linedetection(0,currentSwitchMode);
-
-        // 3）手动/自动
-        currentSwitchControl = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_CONTROL, 0);
-        mBinding.vTopBtn2.setImageResource(currentSwitchControl == 0 ? R.drawable.bottom_btn_3_normal : R.drawable.bottom_btn_4_normal);
-        if (currentSwitchControl == 0) {
-            SerialPortTerminal.getInstance().whiteBtn3();
-        } else {
-            SerialPortTerminal.getInstance().whiteBtn4();
-        }
+        mHandler.sendEmptyMessageDelayed(1, 2000);
     }
 
 
@@ -347,7 +370,23 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         // key: 1:手动, 2:自动 3.回中 4.回中结束
         // TODO: 在手动/自动区域显示上述状态
         public void onDialShortDown(int key) {
-            super.onDialShortDown(key);
+//            super.onDialShortDown(key);
+            switch (key) {
+                case 1:
+                    mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_3_normal);
+                    break;
+                case 2:
+                    mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_4_normal);
+                    break;
+                case 3:
+                    mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_5_press);
+                    break;
+                case 4:
+                    mBinding.vTopBtn2.setImageResource(R.drawable.bottom_btn_5_normal);
+                    break;
+
+            }
+
         }
     };
 
@@ -406,26 +445,6 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //}
         //return null;
     }
-
-    private int devi;
-    @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 2:
-                    mHandler.removeMessages(2);
-                    if (devi != 1000) {
-                        mBinding.vTargetInfo.setTextColor(Color.WHITE);
-                        mBinding.vTargetInfo.setText((devi-320)/3 + "");
-                    } else {
-                        mBinding.vTargetInfo.setTextColor(Color.RED);
-                        mBinding.vTargetInfo.setText("NO TARGET");
-                    }
-                    break;
-            }
-        }
-    };
 
     public void onTargetDeviation(int devi) {
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
