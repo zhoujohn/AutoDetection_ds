@@ -53,10 +53,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     //手动 0  自动 1
     private int currentSwitchControl = 0;
     //亮度最大值 和 最小值
-    private int maxBrightnessLevel = 7;
+    private int maxBrightnessLevel = 10;
     private int minBrightnessLevel = 1;
     //亮度level值 分7段
-    private int[] brightnessArr = {14, 28, 42, 56, 70, 84, 100};
+    private int[] brightnessArr = {7, 14, 20, 28, 36, 42, 56, 70, 84, 100};
 
     private int devi;
     @SuppressLint("HandlerLeak")
@@ -328,6 +328,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             _baseLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+
     }
 
     @Override
