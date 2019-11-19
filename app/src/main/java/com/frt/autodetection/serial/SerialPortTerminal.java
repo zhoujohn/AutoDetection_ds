@@ -46,123 +46,10 @@ public class SerialPortTerminal {
                 return;
             }
 
-            if (key == 1) {
-                switch (status) {
-                    case 1:
-                        listener.onDialShortDown();
-                        break;
-                    case 2:
-                        listener.onDialShortUp();
-                        break;
-                    case 3:
-                        listener.onDialLongDown();
-                        break;
-                    case 4:
-                        listener.onDialLongtUp();
-                        break;
-                    case 5:
-                        listener.onDial2LongDown();
-                        break;
-                }
-
-            } else if (key == 2) {
-                switch (status) {
-                    case 1:
-                        listener.onHangupShortDown();
-                        break;
-                    case 2:
-                        listener.onHangupShortUp();
-                        break;
-                    case 3:
-                        listener.onHangupLongDown();
-                        break;
-                    case 4:
-                        listener.onHangupLongtUp();
-                        break;
-                    case 5:
-                        listener.onHangup2LongDown();
-                        break;
-                }
-
-            } else if (key == 3) {
-                switch (status) {
-                    case 1:
-                        listener.onPlusShortDown();
-                        break;
-                    case 2:
-                        listener.onPlusShortUp();
-                        break;
-                    case 3:
-                        listener.onPlusLongDown();
-                        break;
-                    case 4:
-                        listener.onPlusLongtUp();
-                        break;
-                    case 5:
-                        listener.onPlus2LongDown();
-                        break;
-                }
-
-            } else if (key == 4) {
-                switch (status) {
-                    case 1:
-                        listener.onMinusShortDown();
-                        break;
-                    case 2:
-                        listener.onMinusShortUp();
-                        break;
-                    case 3:
-                        listener.onMinusLongDown();
-                        break;
-                    case 4:
-                        listener.onMinusLongtUp();
-                        break;
-                    case 5:
-                        listener.onMinus2LongDown();
-                        break;
-                }
-
-            } else if (key == 5) {
-                switch (status) {
-                    case 1:
-                        listener.onMKeyShortDown();
-                        break;
-                    case 2:
-                        listener.onMKeyShortUp();
-                        break;
-                    case 3:
-                        listener.onMKeyLongDown();
-                        break;
-                    case 4:
-                        listener.onMKeyLongtUp();
-                        break;
-                    case 5:
-                        listener.onMKey2LongDown();
-                        break;
-                }
-            } else if (key == 6) {
-                switch (status) {
-                    case 1:
-                        listener.onVoiceShortDown();
-                        break;
-                    case 2:
-                        listener.onVoiceShortUp();
-                        break;
-                    case 3:
-                        listener.onVoiceLongDown();
-                        break;
-                    case 4:
-                        listener.onVoiceLongtUp();
-                        break;
-                    case 5:
-                        listener.onVoice2LongDown();
-                        break;
-                }
+            if (type == 0x87) {
+                listener.onDialShortDown(key);
             }
-
         }
-
-        ;
     };
 
     private SerialPortTerminal() {
@@ -390,6 +277,28 @@ public class SerialPortTerminal {
             cmd[2] = (byte) brightness;
             cmd[3] = (byte) 0x00;
             cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void writeDeviation(int devi) {
+        try {
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x81;
+            if (devi == 1000) {
+                cmd[2] = 0;
+                cmd[3] = 0;
+                cmd[4] = (byte)0xFF;
+            } else {
+                cmd[2] = (byte) (devi/256);
+                cmd[3] = (byte) (devi%256);
+                cmd[4] = (byte) 0x00;
+            }
             cmd[5] = (byte) 0x16;
 
             whiteByte(cmd);

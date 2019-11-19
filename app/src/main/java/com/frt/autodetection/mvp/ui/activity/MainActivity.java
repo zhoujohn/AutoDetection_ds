@@ -135,7 +135,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         currentBrightnessLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, 5);
         mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
         //初始化设置亮度
-        SerialPortTerminal.getInstance().writeBrightness(0x11);
+        SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel-1]);
 
         // 2）或者追边/追线模式
         currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
@@ -179,6 +179,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vRightTv.setText("0");
                 }*/
                 _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height, type);
+                //Log.d(TAG, "mROI value isis:" + left + width + type);
 //                setvalidpos(left, top, width, height);
             }
         });
@@ -343,8 +344,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //保存当前的亮度/模式 值
         //SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, current***);
         @Override
-        public void onDialShortDown() {
-            super.onDialShortDown();
+        // key: 1:手动, 2:自动 3.回中 4.回中结束
+        // TODO: 在手动/自动区域显示上述状态
+        public void onDialShortDown(int key) {
+            super.onDialShortDown(key);
         }
     };
 
@@ -386,7 +389,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             });
         }
         this.devi = devi;
-        mHandler.sendEmptyMessage(1);
+        mHandler.sendEmptyMessage(2);
         /*mBinding.vTargetInfo.post(new Runnable() {
             @Override
             public void run() {
@@ -410,11 +413,11 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 1:
-                    mHandler.removeMessages(1);
+                case 2:
+                    mHandler.removeMessages(2);
                     if (devi != 1000) {
                         mBinding.vTargetInfo.setTextColor(Color.WHITE);
-                        mBinding.vTargetInfo.setText(devi + "");
+                        mBinding.vTargetInfo.setText((devi-320)/3 + "");
                     } else {
                         mBinding.vTargetInfo.setTextColor(Color.RED);
                         mBinding.vTargetInfo.setText("NO TARGET");
@@ -427,19 +430,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     public void onTargetDeviation(int devi) {
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
         // send shift value to controller
-        try {
-            int absShift = (devi > 0) ? devi : -devi;
-            String index;
-            if (devi > 0) {
-                index = "0x0050";
-            } else {
-                index = "0x0060";
-            }
-            SerialPortTerminal.getInstance().white(index + absShift);
-            Log.i(TAG, "Shift value of SERIAL is:" + index + absShift);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        SerialPortTerminal.getInstance().writeDeviation(devi);
+        //byte a = (byte)(devi/256);
+        //byte b = (byte)(devi%256);
+        //Log.i(TAG, "Shift value to SERIAL port is:" + a + "b is:" + b);
     }
 
     // start detection of line

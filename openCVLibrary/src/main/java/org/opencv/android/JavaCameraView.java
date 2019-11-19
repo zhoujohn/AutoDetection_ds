@@ -186,8 +186,32 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     List<String> FocusModes = params.getSupportedFocusModes();
                     if (FocusModes != null && FocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
+                    //if (FocusModes != null && FocusModes.contains(Camera.Parameters.FOCUS_MODE_FIXED))
                     {
                         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                        //params.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
+                    }
+
+                    List<String> WhiteBalanceModes = params.getSupportedWhiteBalance();
+                    if (WhiteBalanceModes != null && WhiteBalanceModes.contains(Camera.Parameters.WHITE_BALANCE_AUTO))
+                    {
+                        params.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
+                    }
+
+                    List<String> FlashModes = params.getSupportedFlashModes();
+                    if (FlashModes != null && FlashModes.contains(Camera.Parameters.FLASH_MODE_OFF))
+                    {
+                        params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                    }
+
+                    if (params.isAutoExposureLockSupported())
+                    {
+                        params.setAutoExposureLock(true);
+                    }
+
+                    if (params.isAutoWhiteBalanceLockSupported())
+                    {
+                        params.setAutoExposureLock(true);
                     }
 
                     mCamera.setParameters(params);
@@ -391,16 +415,18 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         // change devi to fit camera frame position
         int rel_devi = 0;
         if (devi != 1000) {
-            rel_devi = mROIx + devi; // add shift value, get abstract value of shift, regarding to original frame point
-            devi = rel_devi - mROIx - mROIw/2; // get relative shift to center of value
+            rel_devi = mROIx_s + devi; // add shift value, get abstract value of shift, regarding to original frame point
+            devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
 
             // update roi position, only update mROIx since it is the only variety of the four variables
-            mROIx_s = mROIx_s + devi;
+            mROIx_s = devi-mROIw/2;
             if (mROIx_s < 0) {
                 mROIx_s = 0;
-            } else if (mROIx_s > (640 - mROIx_s)) {
-                mROIx_s = 640 - mROIx_s;
+            } else if (mROIx_s > (640 - mROIw)) {
+                mROIx_s = 640 - mROIw;
             }
+
+            //Log.d(TAG, "mROI value is:" + mROIx_s + mROIx + mROIw + "devi is:" + devi);
 
         }
 

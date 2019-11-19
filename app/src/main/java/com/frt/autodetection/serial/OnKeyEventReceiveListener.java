@@ -3,7 +3,7 @@ package com.frt.autodetection.serial;
 public abstract class OnKeyEventReceiveListener {
 
 	// 拨号
-	public void onDialShortDown() {
+	public void onDialShortDown(int key) {
 	}
 
 	public void onDialShortUp() {

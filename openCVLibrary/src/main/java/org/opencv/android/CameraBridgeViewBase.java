@@ -63,6 +63,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public int mROIy = 80;
     public int mROIw = 140;
     public int mROIh = 40;
+    public int mStartAlgDetect = 0;
 
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
@@ -95,13 +96,20 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     public void setROI(int x, int y, int width, int height,int type) {
-        synchronized (mSyncObject) {
-            mStartWork = 1;
-            mROIx = x;
-            mROIx_s = mROIx;
-            mROIy = y;
-            mROIw = width;
-            mROIh = height;
+        if (mStartWork==0 || type == 1) {
+            synchronized (mSyncObject) {
+                mStartWork = 1;
+                mROIx = x;
+                mROIx_s = mROIx;
+                mROIy = y;
+                mROIw = width;
+                mROIh = height;
+            }
+        }
+
+        if (type == 1) {
+            // start to choose algorithms automatically
+            mStartAlgDetect = 1;
         }
     }
 

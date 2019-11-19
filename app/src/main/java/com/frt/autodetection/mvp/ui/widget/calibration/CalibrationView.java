@@ -68,16 +68,16 @@ public class CalibrationView extends View implements View.OnTouchListener {
     //----start
     protected Paint paint = new Paint();
 
-    private float minWidth = 100;
-    private float minHeight = 50;
+    private float minWidth = 140;
+    private float minHeight = 40;
 
 
     private float maxWidth = 400;
     private float maxHeight = 200;
 
 
-    private float viewWidth = 100;
-    private float viewHeight = 50;
+    private float viewWidth = 140;
+    private float viewHeight = 40;
 
 
     private RectF rect;
@@ -87,7 +87,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private boolean isShowLine;
 
 
-    private float DEFAULT_VIEW_WIDTH = 120;
+    private float DEFAULT_VIEW_WIDTH = 140;
     private float DEFAULT_ASPECT_RATIO = 2;
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;
@@ -209,6 +209,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
         rect.top = rect.centerY() - viewHeight / 2;
         rect.right = rect.left + viewWidth;
         rect.bottom = rect.top + viewHeight;
+        //Log.d(TAG, "rect value is: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
         invalidate();
         center(0, 0);
     }
@@ -221,7 +222,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
                 case 1:
                     if (mOnOffsetChangeListener != null) {
                         int value = (int) (rect.centerX() - getMeasuredWidth() / 2);
-                        Log.d("setRoiType = ", "handleMessage: "+setRoiType);
+                        //Log.d("setRoiType = ", "handleMessage: "+setRoiType);
                         mOnOffsetChangeListener.OnOffsetChange(value, rect.left, rect.top, rect.width(), rect.height(),setRoiType);
                         setRoiType = 0;
                     }
@@ -331,6 +332,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
         String markPoint = rect.left + "," + rect.top + "," + viewWidth + "," + viewHeight;
         Log.d(TAG, "center: 存储拖动过的 值：" + markPoint);
         SpHelper.getInstance().putString(AppInfo.MARK_POINT, markPoint);
+        //Log.d(TAG, "rect value is: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
         invalidate();
     }
 
@@ -346,16 +348,20 @@ public class CalibrationView extends View implements View.OnTouchListener {
             String[] cacheParamArr = cacheParam.split(",");
             rect.left = Float.parseFloat(cacheParamArr[0]);
             rect.right = rect.left + Float.parseFloat(cacheParamArr[2]);
-
+            //Log.d(TAG, "reading rect value is: " + rect.left + ",right is:" + rect.right);
         }
 
+        float width = rect.right - rect.left;
+        rect.left = devi - width/2;
+        rect.right = rect.left + width;
+        /*
         if (devi > 0) {
             rect.left = rect.left + devi;
             rect.right = rect.right + devi;
         } else {
             rect.left = rect.left - devi;
             rect.right = rect.right - devi;
-        }
+        }*/
         if (rect.left < 0) {
             rect.left = 0;
             rect.right = rect.left + viewWidth;
@@ -372,6 +378,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.bottom = getMeasuredHeight();
             rect.top = rect.bottom - viewHeight;
         }
+
+        //Log.d(TAG, "rect value is: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
         invalidate();
     }
 

@@ -156,7 +156,7 @@ public class ControllerService extends Service {
 						}
 					} else {
 						try {
-							Thread.sleep(50);
+							Thread.sleep(1);
 						} catch (InterruptedException e) {
 						}
 					}

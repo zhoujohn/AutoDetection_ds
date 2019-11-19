@@ -20,17 +20,21 @@ public class ControllerParserImpl implements ControllerParser {
 
 	@Override
 	public synchronized void onBytes(SerialStream stream) {
-		stream.setOffset(2);
+		//stream.setOffset(2);
 		while (stream.getLength() >= LENGTH) {
-			int value = stream.nextInt();
-			if (value != 0x68) {
+			int value = stream.nextByte();
+			if (value != 0xA5) {
 				continue;
 			}
-			int fcode = stream.getInt(10);
-			int kcode = stream.getInt(11);
-			int kstatus = stream.getInt(12);
+			value = stream.getInt(5);
+			if (value != 0x16) {
+				stream.skip(LENGTH - 1);
+				continue;
+			}
+			int fcode = stream.getInt(1);
+			int kcode = stream.getInt(2);
 			stream.skip(LENGTH - 1);
-			sendCode(fcode, kcode, kstatus);
+			sendCode(fcode, kcode, 0);
 			//dispatchKey(fcode, kcode, kstatus);
 		}
 	}
