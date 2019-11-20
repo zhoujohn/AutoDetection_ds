@@ -69,15 +69,15 @@ public class CalibrationView extends View implements View.OnTouchListener {
     protected Paint paint = new Paint();
 
     private float minWidth = 140;
-    private float minHeight = 40;
+    private float minHeight = 30;
 
 
-    private float maxWidth = 400;
-    private float maxHeight = 200;
+    private float maxWidth = 300;
+    private float maxHeight = 60;
 
 
     private float viewWidth = 140;
-    private float viewHeight = 40;
+    private float viewHeight = 30;
 
 
     private RectF rect;
@@ -359,7 +359,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.left = rect.left + devi;
             rect.right = rect.right + devi;
         } else {
-            rect.left = rect.left - devi;
+            rect.left = rect.left - devi;translationBox
             rect.right = rect.right - devi;
         }*/
         if (rect.left < 0) {

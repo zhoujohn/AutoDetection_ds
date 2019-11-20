@@ -49,6 +49,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     private int mPreviewFormat = ImageFormat.NV21;
 
     private int mFrameIdx = 0;
+    private int mFrameShow = 0;
 
     public static class JavaCameraSizeAccessor implements ListItemAccessor {
 
@@ -498,8 +499,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                 }
 
                 if (!mStopThread && hasFrame) {
-                    if (!mFrameChain[1 - mChainIdx].mat.empty())
-                        deliverAndDrawFrame(mCameraFrame[1 - mChainIdx],mFrameChain[1 - mChainIdx].devi);
+                    mFrameShow++;
+                    if (mFrameShow >= 9) {
+                        mFrameShow = 0;
+                        if (!mFrameChain[1 - mChainIdx].mat.empty())
+                            deliverAndDrawFrame(mCameraFrame[1 - mChainIdx],mFrameChain[1 - mChainIdx].devi);
+                    }
                 }
             } while (!mStopThread);
             Log.d(TAG, "Finish processing thread");

@@ -53,10 +53,10 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     //手动 0  自动 1
     private int currentSwitchControl = 0;
     //亮度最大值 和 最小值
-    private int maxBrightnessLevel = 10;
+    private int maxBrightnessLevel = 9;
     private int minBrightnessLevel = 1;
     //亮度level值 分7段
-    private int[] brightnessArr = {7, 14, 20, 28, 36, 42, 56, 70, 84, 100};
+    private int[] brightnessArr = {7, 14, 20, 28, 36, 42, 56, 70, 88};
 
     private int devi;
     @SuppressLint("HandlerLeak")
@@ -421,15 +421,19 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 //        if (!isShowCalLayout && devi != 1000) {
         //现在的逻辑是始终显示devi的值
         if (!isShowCalLayout && devi != 1000) {
-            mBinding.vCalibrationView.post(new Runnable() {
-                @Override
-                public void run() {
-                    mBinding.vCalibrationView.translationBox(devi);
-                }
-            });
+            if ((this.devi / 3) != (devi / 3)) {
+                mBinding.vCalibrationView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBinding.vCalibrationView.translationBox(devi);
+                    }
+                });
+            }
         }
-        this.devi = devi;
-        mHandler.sendEmptyMessage(2);
+        if(this.devi/3 != devi/3){
+            this.devi = devi;
+            mHandler.sendEmptyMessage(2);
+        }
         /*mBinding.vTargetInfo.post(new Runnable() {
             @Override
             public void run() {
@@ -447,10 +451,20 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //return null;
     }
 
+    int logCount = 0;
+    long firstTimeMillis = System.currentTimeMillis();
+
     public void onTargetDeviation(int devi) {
+        if (System.currentTimeMillis() - firstTimeMillis >= 1000) {
+            Log.d(TAG, "aaOnTargetDeviation: count = " + logCount);
+            firstTimeMillis = System.currentTimeMillis();
+            logCount = 0;
+        } else {
+            logCount++;
+        }
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
         // send shift value to controller
-        SerialPortTerminal.getInstance().writeDeviation(devi);
+        //SerialPortTerminal.getInstance().writeDeviation(devi);
         //byte a = (byte)(devi/256);
         //byte b = (byte)(devi%256);
         //Log.i(TAG, "Shift value to SERIAL port is:" + a + "b is:" + b);

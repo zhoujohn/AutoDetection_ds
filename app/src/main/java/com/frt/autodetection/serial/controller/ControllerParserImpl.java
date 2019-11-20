@@ -1,10 +1,13 @@
 package com.frt.autodetection.serial.controller;
 
 import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.view.KeyEvent;
 
 import com.frt.autodetection.serial.IControllerCallback;
 import com.frt.autodetection.serial.SerialStream;
+import com.frt.autodetection.serial.SerialPortTerminal;
+import android.os.RemoteException;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,17 +23,33 @@ public class ControllerParserImpl implements ControllerParser {
 
 	@Override
 	public synchronized void onBytes(SerialStream stream) {
-		//stream.setOffset(2);
+		stream.setOffset(1);
 		while (stream.getLength() >= LENGTH) {
-			int value = stream.nextByte();
+			int value = stream.nextInt(); //stream.nextByte();
+
 			if (value != 0xA5) {
 				continue;
 			}
+			//value = stream.getInt(1);
+			//data[0] = (byte)value;
+			//value = stream.getInt(2);
+			//data[1] = (byte)value;
 			value = stream.getInt(5);
+			//data[2] = (byte)value;
+			//try {
+			//	SerialPortTerminal.getInstance().whiteByte(data);
+			//} catch (RemoteException e) {
+			//	e.printStackTrace();
+			//}
 			if (value != 0x16) {
 				stream.skip(LENGTH - 1);
 				continue;
 			}
+			//try {
+			//	SerialPortTerminal.getInstance().whiteByte(data);
+			//} catch (RemoteException e) {
+			//	e.printStackTrace();
+			//}
 			int fcode = stream.getInt(1);
 			int kcode = stream.getInt(2);
 			stream.skip(LENGTH - 1);
