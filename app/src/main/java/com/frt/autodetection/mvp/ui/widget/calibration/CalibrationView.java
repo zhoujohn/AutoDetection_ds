@@ -68,15 +68,15 @@ public class CalibrationView extends View implements View.OnTouchListener {
     //----start
     protected Paint paint = new Paint();
 
-    private float minWidth = 140;
+    private float minWidth = 120;
     private float minHeight = 30;
 
 
-    private float maxWidth = 300;
+    private float maxWidth = 240;
     private float maxHeight = 60;
 
 
-    private float viewWidth = 140;
+    private float viewWidth = 120;
     private float viewHeight = 30;
 
 
@@ -87,8 +87,12 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private boolean isShowLine;
 
 
-    private float DEFAULT_VIEW_WIDTH = 140;
-    private float DEFAULT_ASPECT_RATIO = 2;
+    private float DEFAULT_VIEW_WIDTH = 120;
+    private float DEFAULT_ASPECT_RATIO = 4;
+    private float DEFAULT_VIEW_LEFT = 260;
+    private float DEFAULT_VIEW_RIGHT = 380;
+    private float DEFAULT_VIEW_TOP = 85;
+    private float DEFAULT_VIEW_BOTTOM = 115;
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;
 
@@ -174,12 +178,16 @@ public class CalibrationView extends View implements View.OnTouchListener {
             isFirstOnMeasure = false;
         } else {
             if (isFirstOnMeasure) {
+                //Log.d(TAG, "rect value isisis: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
                 rect.left = getMeasuredWidth() / 2 - viewWidth / 2;
-                rect.top = getMeasuredHeight() / 2 - viewHeight / 2;
+                rect.top = DEFAULT_VIEW_TOP;//getMeasuredHeight() / 2 - viewHeight / 2;
+                isFirstOnMeasure = false;
+                //Log.d(TAG, "rect value isis: " + getMeasuredHeight() + "width is:"+getMeasuredWidth());
             }
         }
         rect.right = rect.left + viewWidth;
         rect.bottom = rect.top + viewHeight;
+        //Log.d(TAG, "rect value isis: " + rect.left + ",top is:" + rect.top + ",width is:" + viewWidth + "height is:" + viewHeight);
     }
 
     public void setIsTouch(boolean isTouch) {
@@ -190,11 +198,11 @@ public class CalibrationView extends View implements View.OnTouchListener {
 //        viewWidth = viewWidth * scale;
 //        viewHeight = viewHeight * scale;
         if (scale > 1) {
-            viewWidth += 6;
-            viewHeight += 3;
+            viewWidth += 4;
+            viewHeight += 1;
         } else {
-            viewWidth -= 6;
-            viewHeight -= 3;
+            viewWidth -= 4;
+            viewHeight -= 1;
         }
 
         if (viewWidth > maxWidth) {
@@ -349,6 +357,11 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.left = Float.parseFloat(cacheParamArr[0]);
             rect.right = rect.left + Float.parseFloat(cacheParamArr[2]);
             //Log.d(TAG, "reading rect value is: " + rect.left + ",right is:" + rect.right);
+        } else {
+            rect.left = DEFAULT_VIEW_LEFT;
+            rect.right = DEFAULT_VIEW_RIGHT;
+            rect.top = DEFAULT_VIEW_TOP;
+            rect.bottom = DEFAULT_VIEW_BOTTOM;
         }
 
         float width = rect.right - rect.left;
@@ -379,7 +392,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.top = rect.bottom - viewHeight;
         }
 
-        //Log.d(TAG, "rect value is: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
+        //Log.d(TAG, "rect value is: " + rect.left + ",top is:" + rect.top + ",width is:" + viewWidth);
         invalidate();
     }
 

@@ -202,7 +202,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     mBinding.vRightTv.setText("0");
                 }*/
                 _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height, type);
-                //Log.d(TAG, "mROI value isis:" + left + width + type);
+                //Log.d(TAG, "mROI value isis:" + left + "width is:"+ width + "type is:"+ type);
 //                setvalidpos(left, top, width, height);
             }
         });
@@ -421,14 +421,14 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 //        if (!isShowCalLayout && devi != 1000) {
         //现在的逻辑是始终显示devi的值
         if (!isShowCalLayout && devi != 1000) {
-            if ((this.devi / 3) != (devi / 3)) {
+            //if ((this.devi / 3) != (devi / 3)) {
                 mBinding.vCalibrationView.post(new Runnable() {
                     @Override
                     public void run() {
                         mBinding.vCalibrationView.translationBox(devi);
                     }
                 });
-            }
+            //}
         }
         if(this.devi/3 != devi/3){
             this.devi = devi;
@@ -464,7 +464,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         }
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
         // send shift value to controller
-        //SerialPortTerminal.getInstance().writeDeviation(devi);
+        SerialPortTerminal.getInstance().writeDeviation(devi);
         //byte a = (byte)(devi/256);
         //byte b = (byte)(devi%256);
         //Log.i(TAG, "Shift value to SERIAL port is:" + a + "b is:" + b);

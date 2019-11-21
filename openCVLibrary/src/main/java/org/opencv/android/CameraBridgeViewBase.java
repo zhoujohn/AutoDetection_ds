@@ -58,11 +58,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
     public int mCalType = 0; //line tracking: (0: line tracking; 1: edge tracking)
     public int mStartWork = 0;
-    public int mROIx = 250;
-    public int mROIx_s = 250;
-    public int mROIy = 80;
-    public int mROIw = 140;
-    public int mROIh = 40;
+    public int mROIx = 260;
+    public int mROIx_s = 260;
+    public int mROIy = 85;
+    public int mROIw = 120;
+    public int mROIh = 30;
     public int mStartAlgDetect = 0;
 
     public CameraBridgeViewBase(Context context, int cameraId) {

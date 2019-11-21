@@ -396,7 +396,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         Mat sobelImg = thresholdImg.clone();
         Imgproc.Sobel(thresholdImg,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
         Mat storage = new Mat();
-        Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI/60, 36, 36,1);
+        Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI/60, 26, 26,1);
         for (int x = 0; x < storage.rows(); x++)
         {
             double[] vec = storage.get(x, 0);
