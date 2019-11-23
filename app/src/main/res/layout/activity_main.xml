@@ -61,7 +61,8 @@
                 <org.opencv.android.JavaCameraView
                     android:id="@+id/main_surface"
                     android:layout_width="640px"
-                    android:layout_height="200px"
+                    android:layout_height="480px"
+                    android:focusable="true"
                     android:background="@color/transparent"/>
 
                 <ImageView
@@ -73,15 +74,15 @@
             </LinearLayout>
 
 
-            <com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView
+            <!--<com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView
                 android:id="@+id/v_calibration_view"
                 android:layout_width="640px"
-                android:layout_height="200px"
+                android:layout_height="480px"
                 android:layout_centerInParent="true"
                 android:clickable="true"
                 android:focusable="true"
                 android:src="@color/black"
-                cv:showLine="true"/>
+                cv:showLine="true"/>-->
 
         </RelativeLayout>
 

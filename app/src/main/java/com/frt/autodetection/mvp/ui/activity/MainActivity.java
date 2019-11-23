@@ -153,7 +153,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
 //        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
-        _cameraBridgeViewBase.setMaxFrameSize(640, 200);
+        _cameraBridgeViewBase.setMaxFrameSize(640, 480);
 //        _cameraBridgeViewBase.setMaxFrameSize(DensityUtils.dip2px(600),DensityUtils.dip2px(200));
         _cameraBridgeViewBase.SetCaptureFormat(1);
 
@@ -185,13 +185,13 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     @Override
     public void setListener() {
-        mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
+        /*mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
             @Override
             public void OnOffsetChange(int value, float left, float top, float width, float height, int type) {
                 offsetValue = value;
                 //mBinding.vInfo.setText("中线偏移：" + value + "\n" + "框左上角（" + (int) left + "," + (int) top + ")\n框 width：" + width + "\n框 height:" + height);
 
-                /*if (value > 0) {
+                *//*if (value > 0) {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText(value + "");
                 } else if (value < 0) {
@@ -200,12 +200,12 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 } else {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
-                }*/
+                }*//*
                 _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height, type);
                 //Log.d(TAG, "mROI value isis:" + left + "width is:"+ width + "type is:"+ type);
 //                setvalidpos(left, top, width, height);
             }
-        });
+        });*/
         //按钮 ==> 底部按钮
         mBinding.vBtn1.setOnClickListener(this);
         mBinding.vBtn2.setOnClickListener(this);
@@ -287,7 +287,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vLayoutSet.setVisibility(isShowSetLayout ? View.VISIBLE : View.GONE);
         mBinding.vBtnSet.setText(isShowSetLayout ? "ⓧ" : "SET");
 //        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
-        mBinding.vCalibrationView.setIsTouch(false);
+        _cameraBridgeViewBase.setIsTouch(false);
         if (isShowCalLayout) {
             mBinding.vLayoutCal.setVisibility(View.GONE);
             mBinding.vLayoutBottom.setVisibility(View.VISIBLE);
@@ -301,7 +301,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vLayoutCal.setVisibility(isShowCalLayout ? View.VISIBLE : View.GONE);
         //选择框
 //        mBinding.vCalibrationView.setVisibility(isShowCalLayout ? View.VISIBLE : View.INVISIBLE);
-        mBinding.vCalibrationView.setIsTouch(isShowCalLayout);
+        _cameraBridgeViewBase.setIsTouch(isShowCalLayout);
         mBinding.vBtnCal.setText(isShowCalLayout ? "ⓧ" : "CAL");
         if (isShowSetLayout) {
             mBinding.vLayoutSet.setVisibility(View.GONE);
@@ -421,13 +421,14 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 //        if (!isShowCalLayout && devi != 1000) {
         //现在的逻辑是始终显示devi的值
         if (!isShowCalLayout && devi != 1000) {
+            _cameraBridgeViewBase.translationBox(devi);
             //if ((this.devi / 3) != (devi / 3)) {
-                mBinding.vCalibrationView.post(new Runnable() {
+                /*mBinding.vCalibrationView.post(new Runnable() {
                     @Override
                     public void run() {
                         mBinding.vCalibrationView.translationBox(devi);
                     }
-                });
+                });*/
             //}
         }
         if(this.devi/3 != devi/3){
