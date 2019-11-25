@@ -88,13 +88,21 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     break;
                 case 2:
                     mHandler.removeMessages(2);
+                    /*
                     if (devi != 1000) {
                         mBinding.vTargetInfo.setTextColor(Color.WHITE);
-                        mBinding.vTargetInfo.setText((devi - 320) / 3 + "");
+                        int act_devi;
+                        act_devi = (devi-320)/3;
+                        if (act_devi <= -100) {
+                            act_devi = -100;
+                        } else if (act_devi >=100) {
+                            act_devi = 100;
+                        }
+                        mBinding.vTargetInfo.setText(act_devi + "");
                     } else {
                         mBinding.vTargetInfo.setTextColor(Color.RED);
                         mBinding.vTargetInfo.setText("NO TARGET");
-                    }
+                    }*/
                     break;
             }
         }
@@ -185,7 +193,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 
     @Override
     public void setListener() {
-        mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
+        /*mBinding.vCalibrationView.setOnOffsetChangeListener(new CalibrationView.OnOffsetChangeListener() {
             @Override
             public void OnOffsetChange(int value, float left, float top, float width, float height, int type) {
                 offsetValue = value;
@@ -200,12 +208,12 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 } else {
                     mBinding.vLeftTv.setText("0");
                     mBinding.vRightTv.setText("0");
-                }*/
+                }*//*
                 _cameraBridgeViewBase.setROI((int) left, (int) top, (int) width, (int) height, type);
                 //Log.d(TAG, "mROI value isis:" + left + "width is:"+ width + "type is:"+ type);
 //                setvalidpos(left, top, width, height);
             }
-        });
+        }); */
         //按钮 ==> 底部按钮
         mBinding.vBtn1.setOnClickListener(this);
         mBinding.vBtn2.setOnClickListener(this);
@@ -287,7 +295,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vLayoutSet.setVisibility(isShowSetLayout ? View.VISIBLE : View.GONE);
         mBinding.vBtnSet.setText(isShowSetLayout ? "ⓧ" : "SET");
 //        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
-        mBinding.vCalibrationView.setIsTouch(false);
+        //mBinding.vCalibrationView.setIsTouch(false);
+        _cameraBridgeViewBase.setIsTouch(false);
         if (isShowCalLayout) {
             mBinding.vLayoutCal.setVisibility(View.GONE);
             mBinding.vLayoutBottom.setVisibility(View.VISIBLE);
@@ -301,7 +310,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         mBinding.vLayoutCal.setVisibility(isShowCalLayout ? View.VISIBLE : View.GONE);
         //选择框
 //        mBinding.vCalibrationView.setVisibility(isShowCalLayout ? View.VISIBLE : View.INVISIBLE);
-        mBinding.vCalibrationView.setIsTouch(isShowCalLayout);
+        //mBinding.vCalibrationView.setIsTouch(isShowCalLayout);
+        _cameraBridgeViewBase.setIsTouch(isShowCalLayout);
         mBinding.vBtnCal.setText(isShowCalLayout ? "ⓧ" : "CAL");
         if (isShowSetLayout) {
             mBinding.vLayoutSet.setVisibility(View.GONE);
@@ -421,18 +431,35 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
 //        if (!isShowCalLayout && devi != 1000) {
         //现在的逻辑是始终显示devi的值
         if (!isShowCalLayout && devi != 1000) {
+            if ((this.devi / 3) != (devi / 3)) {
+                _cameraBridgeViewBase.translationBox(devi);
+            }
             //if ((this.devi / 3) != (devi / 3)) {
-                mBinding.vCalibrationView.post(new Runnable() {
+                /*mBinding.vCalibrationView.post(new Runnable() {
                     @Override
                     public void run() {
                         mBinding.vCalibrationView.translationBox(devi);
                     }
-                });
+                });*/
             //}
         }
         if(this.devi/3 != devi/3){
             this.devi = devi;
-            mHandler.sendEmptyMessage(2);
+            //mHandler.sendEmptyMessage(2);
+            if (devi != 1000) {
+                mBinding.vTargetInfo.setTextColor(Color.WHITE);
+                int act_devi;
+                act_devi = (devi-320)/3;
+                if (act_devi <= -100) {
+                    act_devi = -100;
+                } else if (act_devi >=100) {
+                    act_devi = 100;
+                }
+                mBinding.vTargetInfo.setText(act_devi + "");
+            } else {
+                mBinding.vTargetInfo.setTextColor(Color.RED);
+                mBinding.vTargetInfo.setText("NO TARGET");
+            }
         }
         /*mBinding.vTargetInfo.post(new Runnable() {
             @Override
@@ -464,7 +491,9 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         }
         Log.i(TAG, "onTargetDeviation value is:" + devi + "...time is:" + System.currentTimeMillis());
         // send shift value to controller
-        SerialPortTerminal.getInstance().writeDeviation(devi);
+        if (!isShowCalLayout) {
+            SerialPortTerminal.getInstance().writeDeviation(devi);
+        }
         //byte a = (byte)(devi/256);
         //byte b = (byte)(devi%256);
         //Log.i(TAG, "Shift value to SERIAL port is:" + a + "b is:" + b);

@@ -62,6 +62,7 @@
                     android:id="@+id/main_surface"
                     android:layout_width="640px"
                     android:layout_height="200px"
+                    android:focusable="true"
                     android:background="@color/transparent"/>
 
                 <ImageView
@@ -73,7 +74,7 @@
             </LinearLayout>
 
 
-            <com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView
+            <!--<com.frt.autodetection.mvp.ui.widget.calibration.CalibrationView
                 android:id="@+id/v_calibration_view"
                 android:layout_width="640px"
                 android:layout_height="200px"
@@ -81,11 +82,11 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:src="@color/black"
-                cv:showLine="true"/>
+                cv:showLine="true"/>-->
 
         </RelativeLayout>
 
-        <TextView
+        <!--TextView
             android:id="@+id/v_target_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -93,6 +94,14 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="15dp"
             android:textSize="25sp"
+            /-->
+        <com.frt.autodetection.mvp.ui.widget.TargetView
+            android:id="@+id/v_target_info"
+            android:layout_width="640px"
+            android:layout_height="100px"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="15dp"
             />
 
         <TextView
