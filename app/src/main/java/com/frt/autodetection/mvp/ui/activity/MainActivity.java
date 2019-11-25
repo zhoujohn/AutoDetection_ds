@@ -431,9 +431,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                 });*/
             //}
         }
-        if(this.devi/3 != devi/3){
+        if (this.devi / 3 != devi / 3) {
             this.devi = devi;
-            mHandler.sendEmptyMessage(2);
+//            mHandler.sendEmptyMessage(2);
+            if (devi != 1000) {
+                mBinding.vTargetInfo.setTextColor(Color.WHITE);
+                mBinding.vTargetInfo.setText((devi - 320) / 3 + "");
+            } else {
+                mBinding.vTargetInfo.setTextColor(Color.RED);
+                mBinding.vTargetInfo.setText("NO TARGET");
+            }
         }
         /*mBinding.vTargetInfo.post(new Runnable() {
             @Override
