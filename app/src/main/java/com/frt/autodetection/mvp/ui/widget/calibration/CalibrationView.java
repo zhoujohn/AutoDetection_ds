@@ -92,6 +92,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private float DEFAULT_VIEW_LEFT = 260;
     private float DEFAULT_VIEW_RIGHT = 380;
     private float DEFAULT_VIEW_TOP = 85;
+    private float DEFAULT_MEASURE_HEIGHT = 200;
     private float DEFAULT_VIEW_BOTTOM = 115;
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;
@@ -205,11 +206,16 @@ public class CalibrationView extends View implements View.OnTouchListener {
             viewHeight -= 1;
         }
 
-        if (viewWidth > maxWidth) {
+        if (viewWidth >= maxWidth) {
             viewWidth = maxWidth;
             viewHeight = maxHeight;
-        } else if (viewWidth < minWidth) {
+        } else if (viewWidth <= minWidth) {
             viewWidth = minWidth;
+            viewHeight = minHeight;
+        }
+        if (viewHeight >= maxHeight) {
+            viewHeight = maxHeight;
+        } else if (viewHeight <= minHeight) {
             viewHeight = minHeight;
         }
 
@@ -217,7 +223,7 @@ public class CalibrationView extends View implements View.OnTouchListener {
         rect.top = rect.centerY() - viewHeight / 2;
         rect.right = rect.left + viewWidth;
         rect.bottom = rect.top + viewHeight;
-        //Log.d(TAG, "rect value is: " + rect.left + ",right is:" + rect.right + ",width is:" + viewWidth);
+        Log.d(TAG, "rect value is: " + rect.left + ",top is:" + rect.top + ",width is:" + viewWidth + ",height is:" + viewHeight);
         invalidate();
         center(0, 0);
     }
@@ -333,8 +339,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.top = 0;
             rect.bottom = rect.top + viewHeight;
         }
-        if (rect.bottom > getMeasuredHeight()) {
-            rect.bottom = getMeasuredHeight();
+        if (rect.bottom > DEFAULT_MEASURE_HEIGHT) { //getMeasuredHeight()) {
+            rect.bottom = DEFAULT_MEASURE_HEIGHT; //getMeasuredHeight();
             rect.top = rect.bottom - viewHeight;
         }
         String markPoint = rect.left + "," + rect.top + "," + viewWidth + "," + viewHeight;
@@ -387,8 +393,8 @@ public class CalibrationView extends View implements View.OnTouchListener {
             rect.top = 0;
             rect.bottom = rect.top + viewHeight;
         }
-        if (rect.bottom > getMeasuredHeight()) {
-            rect.bottom = getMeasuredHeight();
+        if (rect.bottom > DEFAULT_MEASURE_HEIGHT) { //getMeasuredHeight()) {
+            rect.bottom = DEFAULT_MEASURE_HEIGHT; //getMeasuredHeight();
             rect.top = rect.bottom - viewHeight;
         }
 
