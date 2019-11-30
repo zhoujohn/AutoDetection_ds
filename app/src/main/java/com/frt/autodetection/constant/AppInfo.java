@@ -10,6 +10,8 @@ package com.frt.autodetection.constant;
  */
 public interface AppInfo {
     String CURRENT_BRIGHTNESS_LEVEL = "current_brightness_level";
+    String CURRENT_ADDRESS_LEVEL = "current_address_level";
+    String CURRENT_POLARITY_LEVEL = "current_polarity_level";
     String CURRENT_SWITCH_MODE = "current_switch_mode";
     String CURRENT_SWITCH_CONTROL = "current_switch_control";
     String MARK_POINT = "mark_point";
