@@ -14,6 +14,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+
 import com.common.mvplib.config.LayoutConfig;
 import com.frt.autodetection.R;
 import com.frt.autodetection.base.BaseConfigActivity;
@@ -58,6 +61,17 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
     //亮度level值 分7段
     private int[] brightnessArr = {7, 14, 20, 28, 36, 42, 56, 70, 88};
 
+    //设置类型 0 亮度 1 adr 2 pol
+    private int currSetType = 0;
+    //地址值
+    private int currAddressLevel = 1;
+    private int minAddressLevel = 1;
+    private int maxAddressLevel = 2;
+    //极性值
+    private int currPolarityLevel = 0;
+    private int minPolarityLevel = 0;
+    private int maxPolarityLevel = 1;
+
     private int devi;
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -85,6 +99,16 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     } else {
                         SerialPortTerminal.getInstance().whiteBtn4();
                     }
+
+                    // 4）通信地址
+                    currAddressLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_ADDRESS_LEVEL, 1);
+                    //初始化设置通信地址
+                    SerialPortTerminal.getInstance().writeAddress(currAddressLevel);
+
+                    // 5）数据输出极性
+                    currPolarityLevel = SpHelper.getInstance().getInt(AppInfo.CURRENT_POLARITY_LEVEL, 0);
+                    //初始化数据输出极性
+                    SerialPortTerminal.getInstance().writePolarity(currPolarityLevel);
                     break;
                 case 2:
                     mHandler.removeMessages(2);
@@ -231,6 +255,8 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //按钮 ==> CAL
         mBinding.vBtnCal.setOnClickListener(this);
 
+        //按钮  set 中的小图标切换  亮度、地址、极性
+        mBinding.vSetTypeImg.setOnClickListener(this);
     }
 
     @Override
@@ -267,31 +293,108 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             //  通过JNI通知算法 追线模式
             //  linedetection(0,1);
         } else if (id == R.id.v_btn_brightness_min) {    //亮度减小
-            if (currentBrightnessLevel > minBrightnessLevel) {
-                currentBrightnessLevel--;
-                SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
-                mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
-                //通过串口写入亮度值
-                SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
-            }
+            doSetTypeMin();
         } else if (id == R.id.v_btn_brightness_add) {    //亮度增加
-            if (currentBrightnessLevel < maxBrightnessLevel) {
-                currentBrightnessLevel++;
-                SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
-                mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
-                //通过串口写入亮度值
-                SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
-            }
+            doSetTypeAdd();
         } else if (id == R.id.v_btn_set) {              //set
             isShowSetLayout = !isShowSetLayout;
             isShowSetLayout(isShowSetLayout);
         } else if (id == R.id.v_btn_cal) {              //cal
             isShowCalLayout = !isShowCalLayout;
             isShowCalLayout(isShowCalLayout);
+        } else if (id == R.id.v_set_type_img) {              //set中的 小图标
+            currSetType = ++currSetType % 3;
+            switchSetTypeImg();
         }
     }
 
-    private void isShowSetLayout(boolean isShowSetLayout) {
+    /**
+     * 设置 右侧按钮 +
+     */
+    private void doSetTypeAdd() {
+        switch (currSetType) {
+            case 0: //亮度
+                if (currentBrightnessLevel < maxBrightnessLevel) {
+                    currentBrightnessLevel++;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
+                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                    //通过串口写入亮度值
+                    SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
+                }
+                break;
+            case 1: //地址
+                if (currAddressLevel < maxAddressLevel) {
+                    currAddressLevel++;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_ADDRESS_LEVEL, currAddressLevel);
+                    mBinding.vBrightnessTv.setText(currAddressLevel + "");
+                    SerialPortTerminal.getInstance().writeAddress(currAddressLevel);
+                }
+                break;
+            case 2: //极性
+                if (currPolarityLevel < maxPolarityLevel) {
+                    currPolarityLevel++;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_POLARITY_LEVEL, currPolarityLevel);
+                    mBinding.vBrightnessTv.setText(currPolarityLevel + "");
+                    SerialPortTerminal.getInstance().writeBrightness(currPolarityLevel);
+                }
+                break;
+        }
+    }
+
+    /**
+     * 设置 左侧按钮 -
+     */
+    private void doSetTypeMin() {
+        switch (currSetType) {
+            case 0: //亮度
+                if (currentBrightnessLevel > minBrightnessLevel) {
+                    currentBrightnessLevel--;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_BRIGHTNESS_LEVEL, currentBrightnessLevel);
+                    mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                    //通过串口写入亮度值
+                    SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
+                }
+                break;
+            case 1: //地址
+                if (currAddressLevel > minAddressLevel) {
+                    currAddressLevel--;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_ADDRESS_LEVEL, currAddressLevel);
+                    mBinding.vBrightnessTv.setText(currAddressLevel + "");
+                    SerialPortTerminal.getInstance().writeBrightness(currAddressLevel);
+                }
+                break;
+            case 2: //极性
+                if (currPolarityLevel > minPolarityLevel) {
+                    currPolarityLevel--;
+                    SpHelper.getInstance().putInt(AppInfo.CURRENT_POLARITY_LEVEL, currPolarityLevel);
+                    mBinding.vBrightnessTv.setText(currPolarityLevel + "");
+                    SerialPortTerminal.getInstance().writeBrightness(currPolarityLevel);
+                }
+                break;
+        }
+    }
+
+    /**
+     * 切换设置类型图标
+     */
+    private void switchSetTypeImg() {
+        switch (currSetType) {
+            case 0: //亮度
+                mBinding.vSetTypeImg.setImageResource(R.mipmap.icon_brightness_white);
+                mBinding.vBrightnessTv.setText(currentBrightnessLevel + "");
+                break;
+            case 1: //地址
+                mBinding.vSetTypeImg.setImageResource(R.mipmap.icon_adr);
+                mBinding.vBrightnessTv.setText(currAddressLevel + "");
+                break;
+            case 2: //极性
+                mBinding.vSetTypeImg.setImageResource(R.mipmap.icon_pol);
+                mBinding.vBrightnessTv.setText(currPolarityLevel + "");
+                break;
+        }
+    }
+
+    private void isShowSetLayout ( boolean isShowSetLayout){
         mBinding.vLayoutSet.setVisibility(isShowSetLayout ? View.VISIBLE : View.GONE);
         mBinding.vBtnSet.setText(isShowSetLayout ? "ⓧ" : "SET");
 //        mBinding.vCalibrationView.setVisibility(View.INVISIBLE);
@@ -305,7 +408,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         }
     }
 
-    private void isShowCalLayout(boolean isShowCalLayout) {
+    private void isShowCalLayout ( boolean isShowCalLayout){
         mBinding.vLayoutBottom.setVisibility(isShowCalLayout ? View.GONE : View.VISIBLE);
         mBinding.vLayoutCal.setVisibility(isShowCalLayout ? View.VISIBLE : View.GONE);
         //选择框

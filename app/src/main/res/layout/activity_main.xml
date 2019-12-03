@@ -128,6 +128,7 @@
             android:visibility="gone">
 
             <ImageView
+                android:id="@+id/v_set_type_img"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginStart="12dp"

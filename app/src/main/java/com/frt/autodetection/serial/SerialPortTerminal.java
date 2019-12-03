@@ -307,4 +307,39 @@ public class SerialPortTerminal {
         }
     }
 
+    //修改数据输出极性指令：A5  85  X1  00  00  16 （x1范围 0~1）
+    public void writePolarity(int polarity) {
+        try {
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x85;
+            cmd[2] = (byte) polarity;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //修改模块通信地址指令：A5  84  X1  00  00  16 （x1范围 1~2）
+    public void writeAddress(int address) {
+        try {
+            byte[] cmd = new byte[6];
+            cmd[0] = (byte) 0xA5;
+            cmd[1] = (byte) 0x84;
+            cmd[2] = (byte) address;
+            cmd[3] = (byte) 0x00;
+            cmd[4] = (byte) 0x00;
+            cmd[5] = (byte) 0x16;
+
+            whiteByte(cmd);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
