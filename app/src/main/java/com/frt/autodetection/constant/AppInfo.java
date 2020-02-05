@@ -15,4 +15,5 @@ public interface AppInfo {
     String CURRENT_SWITCH_MODE = "current_switch_mode";
     String CURRENT_SWITCH_CONTROL = "current_switch_control";
     String MARK_POINT = "mark_point";
+    String CAL_VALUE = "cal_value";
 }

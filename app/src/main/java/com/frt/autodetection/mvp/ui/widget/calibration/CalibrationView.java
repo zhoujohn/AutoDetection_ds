@@ -68,16 +68,16 @@ public class CalibrationView extends View implements View.OnTouchListener {
     //----start
     protected Paint paint = new Paint();
 
-    private float minWidth = 120;
-    private float minHeight = 30;
+    private float minWidth = 192;
+    private float minHeight = 24;
 
 
-    private float maxWidth = 240;
-    private float maxHeight = 60;
+    private float maxWidth = 192;
+    private float maxHeight = 24;
 
 
-    private float viewWidth = 120;
-    private float viewHeight = 30;
+    private float viewWidth = 192;
+    private float viewHeight = 24;
 
 
     private RectF rect;
@@ -87,20 +87,20 @@ public class CalibrationView extends View implements View.OnTouchListener {
     private boolean isShowLine;
 
 
-    private float DEFAULT_VIEW_WIDTH = 120;
-    private float DEFAULT_ASPECT_RATIO = 4;
-    private float DEFAULT_VIEW_LEFT = 260;
-    private float DEFAULT_VIEW_RIGHT = 380;
-    private float DEFAULT_VIEW_TOP = 85;
-    private float DEFAULT_MEASURE_HEIGHT = 200;
-    private float DEFAULT_VIEW_BOTTOM = 115;
+    private float DEFAULT_VIEW_WIDTH = 192;
+    private float DEFAULT_ASPECT_RATIO = 8;
+    private float DEFAULT_VIEW_LEFT = 224;
+    private float DEFAULT_VIEW_RIGHT = 416;
+    private float DEFAULT_VIEW_TOP = 88;
+    private float DEFAULT_MEASURE_HEIGHT = 24;
+    private float DEFAULT_VIEW_BOTTOM = 112;
     private int DEFAULT_BORDER_COLOR = Color.RED;
     private int DEFAULT_Line_COLOR = Color.GREEN;
 
     private boolean isTouch;
 
     private boolean isFirstOnMeasure = true;
-    private int setRoiType = 1;
+    private int setRoiType = 0;
 
     /**
      * 初始化获取屏幕宽高

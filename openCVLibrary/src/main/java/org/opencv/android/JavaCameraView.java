@@ -16,6 +16,7 @@ import org.opencv.BuildConfig;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.Size;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -50,6 +51,50 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     private int mFrameIdx = 0;
     private int mFrameShow = 0;
+
+    private int mOriginWidth = 640;
+    private int mDetectWidth = 240;
+    private int mMaxLines = 10;
+    private int[] mLines = new int[mMaxLines];
+
+    private static final int MEAN_LEFT_SHIFT = 20;
+    private static final int MEAN_RIGHT_SHIFT = 10;
+    private static final int MEAN_LEFT_RIGHT_DIFF_SHIFT = 10;
+    private static final int MEAN_HEIGHT = 6;
+    private static final int MEAN_WIDTH = 10;
+    private static final int MEAN_ROI_WIDTH = MEAN_LEFT_SHIFT;
+    private static final int MEAN_DELTA_DRIFT = 20;
+    private static final int MEAN_LEFT_RIGHT_DRIFT = 20;
+
+    private static final int DETECTION_AREA_HEIGHT = 30;
+    private static final int LINE_TRACKING_DIFFERENCE = 10;
+
+    private int mExpandDetectArea = 0;
+    private int mInvalidCount = 0;
+    private int mLastVaildValue = 1000;
+    private static final int DEVI_FILTER_COUNT_VALUE = 10;
+    private static final int DEVI_FILTER_OFFSET_VALUE = 60;
+    private static final int DEVI_FILTER_INVALID_VALUE = 1000;
+
+    private int mCalValid1 = 0;
+    private int mCalValid2 = 0;
+    private int mCalValid3 = 0;
+    private int mCalIndex = 0;
+
+    private int mCalLeftMean1 = 0;
+    private int mCalLeftMean2 = 0;
+    private int mCalLeftMean3 = 0;
+    private int mCalRightMean1 = 0;
+    private int mCalRightMean2 = 0;
+    private int mCalRightMean3 = 0;
+
+    private int mRCalLeftMean1 = 0;
+    private int mRCalLeftMean2 = 0;
+    private int mRCalLeftMean3 = 0;
+    private int mRCalRightMean1 = 0;
+    private int mRCalRightMean2 = 0;
+    private int mRCalRightMean3 = 0;
+
 
     public static class JavaCameraSizeAccessor implements ListItemAccessor {
 
@@ -368,44 +413,585 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     }
 
     private int calDeviation(Mat frame, int type) {
-        if (type == 0) {
-            return calDeviation_adap1(frame);
-        } else if (type == 1) {
-            return calDeviation_adap1(frame);
+        if (type == CALIBRATION_TYPE_LINE) {
+            if (mStartAlgDetect !=0) {
+                //mStartAlgDetect = 0;
+                // cal state 0
+                if (mCalIndex == 0) {
+                    int[] v = presetCal2(frame);
+                    mCalValid1 = v[0];
+                    mCalLeftMean1 = v[1];
+                    mCalRightMean1 = v[2];
+                    mRCalLeftMean1 = v[3];
+                    mRCalRightMean1 = v[4];
+                    if (mCalValid1 != DEVI_FILTER_INVALID_VALUE) {
+                        mCalIndex = 1;
+                    }
+                    return DEVI_FILTER_INVALID_VALUE;
+                } else if (mCalIndex == 1) {
+                    // cal state 1
+                    int v[] = presetCal2(frame);
+                    mCalValid2 = v[0];
+                    mCalLeftMean2 = v[1];
+                    mCalRightMean2 = v[2];
+                    mRCalLeftMean2 = v[3];
+                    mRCalRightMean2 = v[4];
+                    if (Math.abs(mCalValid2-mCalValid1) < 2) {
+                        mCalIndex = 2;
+                    } else {
+                        mCalIndex = 0;
+                    }
+                    return DEVI_FILTER_INVALID_VALUE;
+                } else {
+                    // cal state 2
+                    int v[] = presetCal2(frame);
+                    mCalValid3 = v[0];
+                    mCalLeftMean3 = v[1];
+                    mCalRightMean3 = v[2];
+                    mRCalLeftMean3 = v[3];
+                    mRCalRightMean3 = v[4];
+                    if ((Math.abs(mCalValid3-mCalValid1) < 2)
+                            && (Math.abs(mCalValid3-mCalValid2) < 2)) {
+                        mStartAlgDetect = 0;
+                        mCalIndex = 0;
+
+                        int mean_l = (mCalLeftMean1+mCalLeftMean2+mCalLeftMean3)/3;
+                        int mean_r = (mCalRightMean1+mCalRightMean2+mCalRightMean3)/3;
+                        int mean_rl = (mRCalLeftMean1+mRCalLeftMean2+mRCalLeftMean3)/3;
+                        int mean_rr = (mRCalRightMean1+mRCalRightMean2+mRCalRightMean3)/3;
+                        saveCalValue(mean_l, mean_rl, mean_r, mean_rr, v[5]);
+                        int mean = (mCalValid1+mCalValid2+mCalValid3)/3;
+                        return mean;
+                    } else {
+                        mCalValid1 = mCalValid3;
+                        mCalLeftMean1 = v[1];
+                        mCalRightMean1 = v[2];
+                        mRCalLeftMean1 = v[3];
+                        mRCalRightMean1 = v[4];
+                        mCalIndex = 1;
+                        return DEVI_FILTER_INVALID_VALUE;
+                    }
+                }
+            } else {
+                return calDeviation_adap2(frame);
+            }
         } else {
-            return calDeviation_adap1(frame);
+            if (mStartAlgDetect !=0) {
+                //mStartAlgDetect = 0;
+                // cal state 0
+                if (mCalIndex == 0) {
+                    int[] v = presetCal(frame);
+                    mCalValid1 = v[0];
+                    mCalLeftMean1 = v[1];
+                    mCalRightMean1 = v[2];
+                    if (mCalValid1 != DEVI_FILTER_INVALID_VALUE) {
+                        mCalIndex = 1;
+                    }
+                    return DEVI_FILTER_INVALID_VALUE;
+                } else if (mCalIndex == 1) {
+                    // cal state 1
+                    int v[] = presetCal(frame);
+                    mCalValid2 = v[0];
+                    mCalLeftMean2 = v[1];
+                    mCalRightMean2 = v[2];
+                    if (Math.abs(mCalValid2-mCalValid1) < 2) {
+                        mCalIndex = 2;
+                    } else {
+                        mCalIndex = 0;
+                    }
+                    return DEVI_FILTER_INVALID_VALUE;
+                } else {
+                    // cal state 2
+                    int v[] = presetCal(frame);
+                    mCalValid3 = v[0];
+                    mCalLeftMean3 = v[1];
+                    mCalRightMean3 = v[2];
+                    if ((Math.abs(mCalValid3-mCalValid1) < 2)
+                            && (Math.abs(mCalValid3-mCalValid2) < 2)) {
+                        mStartAlgDetect = 0;
+                        mCalIndex = 0;
+
+                        int mean_l = (mCalLeftMean1+mCalLeftMean2+mCalLeftMean3)/3;
+                        int mean_r = (mCalRightMean1+mCalRightMean2+mCalRightMean3)/3;
+                        saveCalValue(mean_l, 0, mean_r, 0, 0);
+                        int mean = (mCalValid1+mCalValid2+mCalValid3)/3;
+                        return mean;
+                    } else {
+                        mCalValid1 = mCalValid3;
+                        mCalLeftMean1 = v[1];
+                        mCalRightMean1 = v[2];
+                        mCalIndex = 1;
+                        return DEVI_FILTER_INVALID_VALUE;
+                    }
+                }
+            } else {
+                return calDeviation_adap1(frame);
+            }
         }
     }
 
+    private int alignRoi(int x, int w) {
+        int width;
+
+        if ((mOriginWidth - x) <= mDetectWidth) {
+            width = w;
+        } else if ((w + x) < mDetectWidth) {
+            width = w;
+        } else {
+            width = mDetectWidth;
+        }
+        return width;
+    }
+
+    private void detectLinesHough(Mat frame) {
+        int index = 0;
+
+        //Mat sobelImg = frame.clone();
+        //Imgproc.Sobel(frame,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
+        Mat storage = new Mat();
+        Imgproc.HoughLinesP(frame, storage, 1,  Math.PI, DETECTION_AREA_HEIGHT-2,
+                DETECTION_AREA_HEIGHT-2,1);
+        for (int x = 0; x < mMaxLines; x++) {
+            mLines[x] = 0;
+        }
+        for (int x = 0; x < storage.rows(); x++)
+        {
+            // get first mMaxLines
+            double[] vec = storage.get(x, 0);
+            double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
+            mLines[index++] = (int)x1;
+            Log.d(TAG, "detected lines at:" + mLines[index-1] + "frame width:" + frame.width());
+
+            if (index >= mMaxLines) {
+                break;
+            }
+        //Point start = new Point(x1, y1);
+        //Point end = new Point(x2, y2);
+        //Imgproc.line(frame, start, end, new Scalar(255, 255, 255, 255), 1, Imgproc.LINE_4, 0);
+        }
+
+        //sobelImg.release();
+        storage.release();
+    }
+
+    private void detectLines(Mat frame) {
+        int index = 0;
+        int w = frame.width();
+        int h = frame.height();
+        int weight[] = new int[w];
+
+        for (int i =0; i<mMaxLines; i++) {
+            mLines[i] = 0;
+        }
+
+        for (int i = 0; i< w; i++) {
+            int acc = 0;
+            for (int j = 0; j < h; j++) {
+                double xyz[];
+                xyz = frame.get(j,i);
+                //Log.e(TAG, "get xyz value" + (int) (xyz[0]) + "width is" + i + "height is" + j);
+
+                if ((int)(xyz[0]) > 0) {
+                    acc++;
+                }
+            }
+            weight[i] = acc;
+        }
+
+        // only get first 10 lines
+        for (int i=0; i<w; i++) {
+            if (weight[i] >= (h-2)) {
+                if (index < mMaxLines) {
+                    mLines[index++] = i;
+                }
+            }
+        }
+
+        return;
+    }
+
+    private int[] getMeans(Mat frame, int line) {
+        int isvalid = 0;
+        int means[] = new int[5];
+        means[0] = isvalid;
+
+        //mLeftMean = 0;
+        //mRightMean = 0;
+        Log.d(TAG, "getmeans line value:" + line + "frame width is:" + frame.width() + "height is:" + frame.height());
+
+        if ((line < MEAN_ROI_WIDTH) || (line > (frame.width() - MEAN_ROI_WIDTH))) {
+            return means;
+        }
+
+        // get mean value of left area
+        //Rect rect = new Rect(line-MEAN_LEFT_SHIFT, mROIy, MEAN_WIDTH, MEAN_HEIGHT);
+        Rect rect = new Rect(line-MEAN_LEFT_SHIFT, 0, MEAN_WIDTH, MEAN_HEIGHT);
+        Mat roi = new Mat(frame, rect);
+        Mat gray  = roi.submat(0,MEAN_HEIGHT,0,MEAN_WIDTH);
+
+        MatOfDouble l_mean = new MatOfDouble();
+        MatOfDouble l_stddev = new MatOfDouble();
+        Core.meanStdDev(gray, l_mean, l_stddev);
+        means[1] = (int)l_mean.get(0,0)[0];
+        means[2] = (int)l_stddev.get(0,0)[0];
+
+        // get mean value of right area
+        Rect rect1 = new Rect(line+MEAN_RIGHT_SHIFT, 0, MEAN_WIDTH, MEAN_HEIGHT);
+        Mat roi1 = new Mat(frame, rect1);
+        Mat gray1  = roi1.submat(0,MEAN_HEIGHT,0,MEAN_WIDTH);
+
+        MatOfDouble r_mean = new MatOfDouble();
+        MatOfDouble r_stddev = new MatOfDouble();
+        Core.meanStdDev(gray, r_mean, r_stddev);
+        means[3] = (int)r_mean.get(0,0)[0];
+        means[4] = (int)r_stddev.get(0,0)[0];
+
+        isvalid = 1;
+
+        means[0] = isvalid;
+        Log.d(TAG, "getmeans valid:" + means[0] + "left mean:" + means[1] + "right stddev:" + means[2]);
+
+        l_mean.release();
+        l_stddev.release();
+        r_mean.release();
+        r_stddev.release();
+        roi.release();
+        gray.release();
+        roi1.release();
+        gray1.release();
+
+        return means;
+    }
+
+    private int[] getMeansPRI(Mat frame, int line) {
+        int isvalid = 0;
+        int total = 0;
+        int means[] = new int[3];
+        means[0] = isvalid;
+
+        //mLeftMean = 0;
+        //mRightMean = 0;
+        Log.d(TAG, "getmeans line value:" + line + "frame width is:" + frame.width() + "height is:" + frame.height());
+
+        if ((line < MEAN_ROI_WIDTH) || (line > (frame.width() - MEAN_ROI_WIDTH))) {
+            return means;
+        }
+
+        // get mean value of left area
+        //Rect rect = new Rect(line-MEAN_LEFT_SHIFT, mROIy, MEAN_WIDTH, MEAN_HEIGHT);
+        Rect rect = new Rect(line-MEAN_LEFT_SHIFT, 0, MEAN_WIDTH, MEAN_HEIGHT);
+        Mat roi = new Mat(frame, rect);
+        Mat gray  = roi.submat(0,MEAN_HEIGHT,0,MEAN_WIDTH);
+        for (int i=0; i<gray.width(); i++) {
+            for (int j=0; j<gray.height(); j++) {
+                total += (int)gray.get(j,i)[0];
+            }
+        }
+        //mLeftMean = total/(gray.width() * gray.height());
+        means[1] = total/(gray.width() * gray.height());
+
+        // get mean value of right area
+        total = 0;
+        Rect rect1 = new Rect(line+MEAN_RIGHT_SHIFT, 0, MEAN_WIDTH, MEAN_HEIGHT);
+        Mat roi1 = new Mat(frame, rect1);
+        Mat gray1  = roi1.submat(0,MEAN_HEIGHT,0,MEAN_WIDTH);
+        for (int i=0; i<gray1.width(); i++) {
+            for (int j=0; j<gray1.height(); j++) {
+                total += (int)gray1.get(j,i)[0];
+            }
+        }
+        //mRightMean = total/(gray1.width() * gray1.height());
+        means[2] = total/(gray1.width() * gray1.height());
+
+        isvalid = 1;
+
+        means[0] = isvalid;
+        Log.d(TAG, "getmeans valid:" + means[0] + "left:" + means[1] + "right:" + means[2]);
+
+
+        roi.release();
+        gray.release();
+        roi1.release();
+        gray1.release();
+
+        return means;
+    }
+
+    private int deviFilter(int devi) {
+        int devi_s = 0;
+
+        // check if continuous 'no target'
+        if (devi == DEVI_FILTER_INVALID_VALUE) {
+            mInvalidCount++;
+            if (mInvalidCount > DEVI_FILTER_COUNT_VALUE) {
+                mExpandDetectArea = 1;
+            }
+            devi_s = devi;
+
+            return devi_s;
+        }
+
+        mInvalidCount = 0;
+        mExpandDetectArea = 0;
+
+        if (mLastVaildValue == DEVI_FILTER_INVALID_VALUE){
+            mLastVaildValue = devi;
+            devi_s = devi;
+        } else {
+            if (Math.abs(mLastVaildValue - devi) < DEVI_FILTER_OFFSET_VALUE) {
+                mLastVaildValue = devi;
+                devi_s = devi;
+            } else {
+                devi_s = DEVI_FILTER_INVALID_VALUE;
+            }
+        }
+
+        return devi_s;
+    }
+
+    private int[] presetCal(Mat frame) {
+        int devi = DEVI_FILTER_INVALID_VALUE;
+        int[] value_array = new int[3];
+        value_array[0] = DEVI_FILTER_INVALID_VALUE;
+        value_array[1] = 0;
+        value_array[2] = 0;
+        //int roiwidth = mROIw;
+
+        // 1. first step: detect lines
+        // settings of ROI is not ready
+        if (mStartWork == 0) {
+            value_array[0] = devi;
+            return value_array;
+        }
+
+        //roiwidth = alignRoi(mROIx_s, mROIw);
+
+        Rect rect = new Rect(mROIx_s, mROIy, mROIw, DETECTION_AREA_HEIGHT);
+        Mat roi = new Mat(frame, rect);
+
+        Mat gray  = roi.submat(0,DETECTION_AREA_HEIGHT,0,mROIw);
+        Mat target = gray.clone();
+        //Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        Imgproc.bilateralFilter(gray,target,9,5,5);
+        Mat thresholdImg = target.clone();
+        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 3, 2);
+
+        //detectLines(thresholdImg);
+        detectLinesHough(thresholdImg);
+
+        // 2. second step: choose the most suitable one of the detected lines
+        int validLine = 0;
+        for (int i = 0; i < mMaxLines; i++) {
+            if ((mLines[i] != 0) &&
+                    (Math.abs(mLines[i] - mROIw/2) < Math.abs(validLine - mROIw/2)))  {
+                // always choose the center-most one
+                validLine = mLines[i];
+            }
+        }
+
+        // 3. third step: get mean value of two sides of detected line
+        int res[] = getMeans(thresholdImg, validLine);
+        int isvalid = res[0];
+        if (isvalid != 0) {
+            //saveCalValue(res[1], res[2], res[3], res[4]);
+            value_array[1] = res[1];
+            value_array[2] = res[3];
+        }
+
+        int rel_devi;
+        if (isvalid != 0) {
+            rel_devi = mROIx_s + validLine; // add shift value, get abstract value of shift, regarding to original frame point
+            devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
+            value_array[0] = devi;
+
+            // NOTES: Do not update roi position at calibration state.
+            // update roi position, only update mROIx since it is the only variety of the four variables
+            /*
+            mROIx_s = devi-mROIw/2;
+            if (mROIx_s < 0) {
+                mROIx_s = 0;
+            } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                mROIx_s = mOriginWidth - mROIw;
+            }
+            */
+        }
+
+        roi.release();
+        gray.release();
+        target.release();
+        thresholdImg.release();
+        return value_array;
+    }
+
+    private int[] presetCal2(Mat frame) {
+        int devi = DEVI_FILTER_INVALID_VALUE;
+        int[] value_array = new int[6];
+        value_array[0] = DEVI_FILTER_INVALID_VALUE;
+        value_array[1] = 0;
+        value_array[2] = 0;
+        value_array[3] = 0;
+        value_array[4] = 0;
+        value_array[5] = 0;
+        //int roiwidth = mROIw;
+
+        // 1. first step: detect lines
+        // settings of ROI is not ready
+        if (mStartWork == 0) {
+            value_array[0] = devi;
+            return value_array;
+        }
+
+        //roiwidth = alignRoi(mROIx_s, mROIw);
+
+        Rect rect = new Rect(mROIx_s, mROIy, mROIw, DETECTION_AREA_HEIGHT);
+        Mat roi = new Mat(frame, rect);
+
+        Mat gray  = roi.submat(0,DETECTION_AREA_HEIGHT,0,mROIw);
+        Mat target = gray.clone();
+        //Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        Imgproc.bilateralFilter(gray,target,9,5,5);
+        Mat thresholdImg = target.clone();
+        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 3, 2);
+
+        //detectLines(thresholdImg);
+        detectLinesHough(thresholdImg);
+
+        // 2. second step: choose the most suitable one of the detected lines
+        int validLine_l = 0;
+        int validLine_r = 0;
+        int validLine = 0;
+        for (int i = 0; i < mMaxLines; i++) {
+            if (mLines[i] != 0) {
+                if (mLines[i] < mROIw / 2) {
+                    if ((mROIw / 2 - mLines[i]) < (mROIw / 2 - validLine_l)) {
+                        // always choose the center-most two lines from two sides
+                        validLine_l = mLines[i];
+                    }
+                } else {
+                    if ((mLines[i] - mROIw / 2) < Math.abs(validLine_r - mROIw / 2)) {
+                        // always choose the center-most two lines from two sides
+                        validLine_r = mLines[i];
+                    }
+                }
+            }
+        }
+
+        // 3. third step: get mean value of two sides of detected line
+        int res_l[] = getMeans(thresholdImg, validLine_l);
+        int res_r[] = getMeans(thresholdImg, validLine_r);
+        int isvalid_l = res_l[0];
+        int isvalid_r = res_r[0];
+        if ((isvalid_l != 0) && (isvalid_r != 0)) {
+            //saveCalValue(res[1], res[2], res[3], res[4]);
+            value_array[1] = res_l[1];
+            value_array[2] = res_l[3];
+            value_array[3] = res_r[1];
+            value_array[4] = res_r[3];
+            value_array[5] = validLine_r - validLine_l;
+            if ((validLine_r - validLine_l) > LINE_TRACKING_DIFFERENCE) {
+                value_array[0] = (validLine_l + validLine_r) / 2;
+            }
+        }
+
+        int rel_devi;
+        if (value_array[0] != DEVI_FILTER_INVALID_VALUE) {
+            validLine = value_array[0];
+            rel_devi = mROIx_s + validLine; // add shift value, get abstract value of shift, regarding to original frame point
+            devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
+            value_array[0] = devi;
+
+            // NOTES: Do not update roi position at calibration state.
+            // update roi position, only update mROIx since it is the only variety of the four variables
+            /*
+            mROIx_s = devi-mROIw/2;
+            if (mROIx_s < 0) {
+                mROIx_s = 0;
+            } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                mROIx_s = mOriginWidth - mROIw;
+            }
+            */
+        }
+
+        roi.release();
+        gray.release();
+        target.release();
+        thresholdImg.release();
+        return value_array;
+    }
+
     private int calDeviation_adap1(Mat frame) {
-        int devi = 1000;
+        int devi = DEVI_FILTER_INVALID_VALUE;
+        int roiwidth = mROIw;
+        int roistart = mROIx_s;
 
         // settings of ROI is not ready
         if (mStartWork == 0) {
             return devi;
         }
 
-        Rect rect = new Rect(mROIx_s, mROIy, mROIw, mROIh);
+
+        if (mExpandDetectArea == 1) {
+            roiwidth = alignRoi(roistart, mROIw);
+            roistart = mROIx_s - (roiwidth - mROIw)/2;
+        }
+        Rect rect = new Rect(roistart, mROIy, roiwidth, DETECTION_AREA_HEIGHT);
         Mat roi = new Mat(frame, rect);
 
-        Mat gray  = roi.submat(0,mROIh,0,mROIw);
+        Mat gray  = roi.submat(0,DETECTION_AREA_HEIGHT,0,roiwidth);
         Mat target = gray.clone();
-        Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        //Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        Imgproc.bilateralFilter(gray,target,9,5,5);
         Mat thresholdImg = target.clone();
-        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, -3);
-        Mat sobelImg = thresholdImg.clone();
-        Imgproc.Sobel(thresholdImg,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
-        Mat storage = new Mat();
-        Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI/60, 26, 26,1);
-        for (int x = 0; x < storage.rows(); x++)
-        {
-            double[] vec = storage.get(x, 0);
-            double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
-            devi = (int)x1;
+        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 3, 2);
+        detectLinesHough(thresholdImg);
+        // detect lines
+        //detectLines(thresholdImg);
+        int validLine = 0;
+        for (int i = 0; i < mMaxLines; i++) {
+            if (mLines[i] != 0) {
+                //validLine = mLines[i];
+                int mean[] = getMeans(thresholdImg, mLines[i]);
+                if (mean[0] != 0) {
+                    int diff;
+                    if (mean[1] > mean[2]) {
+                        diff = 0;
+                    } else {
+                        diff = 1;
+                    }
+
+                    if (mIsCalibrated != 0) {
+                        if ((Math.abs(mean[1] - mLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[2] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (diff == mMeanDiff) &&
+                                (Math.abs(Math.abs(mean[1] - mean[2]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
+                            //get valid line
+                            validLine = mLines[i];
+                            break;
+                        }
+                    }  else {
+                        // not calibrated, always choose the first one
+                        //validLine = mLines[i];
+                        // not calibrated, return invalid value
+                        validLine = 1000;
+                        break;
+                    }
+                }
+            }
+        }
+
+        //Mat sobelImg = thresholdImg.clone();
+        //Imgproc.Sobel(thresholdImg,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
+        //Mat storage = new Mat();
+        //Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI, 22, 22,1);
+        //for (int x = 0; x < storage.rows(); x++)
+        //{
+         //   double[] vec = storage.get(x, 0);
+         //   double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
+         //   devi = (int)x1;
             //Point start = new Point(x1, y1);
             //Point end = new Point(x2, y2);
             //Imgproc.line(frame, start, end, new Scalar(255, 255, 255, 255), 1, Imgproc.LINE_4, 0);
-        }
+        //}
 
         //Imgproc.cvtColor(roi, gray, Imgproc.COLOR_RGB2GRAY);
         //threshold
@@ -415,28 +1001,181 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
         // change devi to fit camera frame position
         int rel_devi = 0;
-        if (devi != 1000) {
-            rel_devi = mROIx_s + devi; // add shift value, get abstract value of shift, regarding to original frame point
+        if (validLine != 0) {
+            rel_devi = roistart + devi; // add shift value, get abstract value of shift, regarding to original frame point
             devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
 
             // update roi position, only update mROIx since it is the only variety of the four variables
             mROIx_s = devi-mROIw/2;
             if (mROIx_s < 0) {
                 mROIx_s = 0;
-            } else if (mROIx_s > (640 - mROIw)) {
-                mROIx_s = 640 - mROIw;
+            } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                mROIx_s = mOriginWidth - mROIw;
             }
-
             //Log.d(TAG, "mROI value is:" + mROIx_s + mROIx + mROIw + "devi is:" + devi);
-
         }
+
+        devi = deviFilter(devi);
 
 
         roi.release();
+        gray.release();
         target.release();
         thresholdImg.release();
-        sobelImg.release();
-        storage.release();
+        return devi;
+    }
+
+    private int getRightLine(int left, Mat frame) {
+        int right = 0;
+
+        for (int i = 0; i < mMaxLines; i++) {
+            if (mLines[i] > left) {
+                //validLine = mLines[i];
+                int mean[] = getMeans(frame, mLines[i]);
+                if (mean[0] != 0) {
+                    int diff;
+                    if (mean[1] > mean[2]) {
+                        diff = 0;
+                    } else {
+                        diff = 1;
+                    }
+
+                    if (mIsCalibrated != 0) {
+                        if ((Math.abs(mean[1] - mRLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[2] - mRRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (diff == mRMeanDiff) &&
+                                (Math.abs(Math.abs(mean[1] - mean[2]) - mRMeanDelta) < MEAN_DELTA_DRIFT)) {
+                            // check if left right difference is suitable
+                            int delta = mLines[i] - left;
+                            if (Math.abs(delta - mRightLeftMeanDiff) < MEAN_LEFT_RIGHT_DIFF_SHIFT) {
+                                // get correct right line
+                                right = mLines[i];
+                                break;
+                            }
+                        }
+                    } else {
+                        // not calibrated, always choose the first one
+                        // validLine = mLines[i];
+                        // not calibrated, return invalid value
+                        right = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return right;
+    }
+
+    private int calDeviation_adap2(Mat frame) {
+        int devi = DEVI_FILTER_INVALID_VALUE;
+        int roiwidth = mROIw;
+        int roistart = mROIx_s;
+
+        // settings of ROI is not ready
+        if (mStartWork == 0) {
+            return devi;
+        }
+
+
+        if (mExpandDetectArea == 1) {
+            roiwidth = alignRoi(roistart, mROIw);
+            roistart = mROIx_s - (roiwidth - mROIw)/2;
+        }
+        Rect rect = new Rect(roistart, mROIy, roiwidth, DETECTION_AREA_HEIGHT);
+        Mat roi = new Mat(frame, rect);
+
+        Mat gray  = roi.submat(0,DETECTION_AREA_HEIGHT,0,roiwidth);
+        Mat target = gray.clone();
+        //Imgproc.GaussianBlur(gray,target,new Size(3,3),0,0);
+        Imgproc.bilateralFilter(gray,target,9,5,5);
+        Mat thresholdImg = target.clone();
+        Imgproc.adaptiveThreshold(target, thresholdImg,255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY_INV, 3, 2);
+        detectLinesHough(thresholdImg);
+        // detect lines
+        //detectLines(thresholdImg);
+        int validLine = 0;
+        int validLine_l = 0;
+        int validLine_r = 0;
+        for (int i = 0; i < mMaxLines; i++) {
+            if (mLines[i] != 0) {
+                //validLine = mLines[i];
+                int mean[] = getMeans(thresholdImg, mLines[i]);
+                if (mean[0] != 0) {
+                    int diff;
+                    if (mean[1] > mean[2]) {
+                        diff = 0;
+                    } else {
+                        diff = 1;
+                    }
+
+                    if (mIsCalibrated != 0) {
+                        if ((Math.abs(mean[1] - mLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[2] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (diff == mMeanDiff) &&
+                                (Math.abs(Math.abs(mean[1] - mean[2]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
+                            //get valid left line
+                            validLine_l = mLines[i];
+                            validLine_r = getRightLine(validLine_l, thresholdImg);
+                            if (validLine_r != 0) {
+                                validLine = (validLine_l + validLine_r)/2;
+                                break;
+                            }
+                        }
+                    }  else {
+                        // not calibrated, always choose the first one
+                        // validLine = mLines[i];
+                        // not calibrated, return invalid value
+                        validLine = 1000;
+                        break;
+                    }
+                }
+            }
+        }
+
+        //Mat sobelImg = thresholdImg.clone();
+        //Imgproc.Sobel(thresholdImg,sobelImg,-1,1,0,1,1,0, Core.BORDER_DEFAULT);
+        //Mat storage = new Mat();
+        //Imgproc.HoughLinesP(sobelImg, storage, 1,  Math.PI, 22, 22,1);
+        //for (int x = 0; x < storage.rows(); x++)
+        //{
+        //   double[] vec = storage.get(x, 0);
+        //   double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
+        //   devi = (int)x1;
+        //Point start = new Point(x1, y1);
+        //Point end = new Point(x2, y2);
+        //Imgproc.line(frame, start, end, new Scalar(255, 255, 255, 255), 1, Imgproc.LINE_4, 0);
+        //}
+
+        //Imgproc.cvtColor(roi, gray, Imgproc.COLOR_RGB2GRAY);
+        //threshold
+        //sobel ---> x
+        //get line detection
+        //get position of line ---> x
+
+        // change devi to fit camera frame position
+        int rel_devi = 0;
+        if (validLine != 0) {
+            rel_devi = roistart + devi; // add shift value, get abstract value of shift, regarding to original frame point
+            devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
+
+            // update roi position, only update mROIx since it is the only variety of the four variables
+            mROIx_s = devi-mROIw/2;
+            if (mROIx_s < 0) {
+                mROIx_s = 0;
+            } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                mROIx_s = mOriginWidth - mROIw;
+            }
+            //Log.d(TAG, "mROI value is:" + mROIx_s + mROIx + mROIw + "devi is:" + devi);
+        }
+
+        devi = deviFilter(devi);
+
+
+        roi.release();
+        gray.release();
+        target.release();
+        thresholdImg.release();
         return devi;
     }
 

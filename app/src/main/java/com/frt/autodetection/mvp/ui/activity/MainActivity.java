@@ -85,10 +85,11 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
                     //初始化设置亮度
                     SerialPortTerminal.getInstance().writeBrightness(brightnessArr[currentBrightnessLevel - 1]);
 
-                    // 2）或者追边/追线模式
+                    // 2）get追边/追线模式
                     currentSwitchMode = SpHelper.getInstance().getInt(AppInfo.CURRENT_SWITCH_MODE, 0);
                     mBinding.vTopBtn1.setImageResource(currentSwitchMode == 0 ? R.drawable.icon_zhuibian_white : R.drawable.icon_zhuixian_white);
                     //  通过JNI通知算法 追边模式
+                    _cameraBridgeViewBase.setCalibrationType(currentSwitchMode);
                     //  linedetection(0,currentSwitchMode);
 
                     // 3）手动/自动
@@ -284,12 +285,14 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             currentSwitchMode = 0;
             mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuibian_white);
             SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_MODE, currentSwitchMode);
+            _cameraBridgeViewBase.setCalibrationType(currentSwitchMode);
             //  通过JNI通知算法 追边模式
             //  linedetection(0,0);
         } else if (id == R.id.v_btn_zhuixian) {         //追线
             currentSwitchMode = 1;
             mBinding.vTopBtn1.setImageResource(R.drawable.icon_zhuixian_white);
             SpHelper.getInstance().putInt(AppInfo.CURRENT_SWITCH_MODE, currentSwitchMode);
+            _cameraBridgeViewBase.setCalibrationType(currentSwitchMode);
             //  通过JNI通知算法 追线模式
             //  linedetection(0,1);
         } else if (id == R.id.v_btn_brightness_min) {    //亮度减小
@@ -420,6 +423,9 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             mBinding.vLayoutSet.setVisibility(View.GONE);
             mBinding.vBtnSet.setText("SET");
             isShowSetLayout = false;
+            _cameraBridgeViewBase.setCalStatus(1);
+        } else {
+            _cameraBridgeViewBase.setCalStatus(0);
         }
     }
 

@@ -65,21 +65,36 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int RGBA = 1;
     public static final int GRAY = 2;
 
-    public int mCalType = 0; //line tracking: (0: line tracking; 1: edge tracking)
+    public static final int CALIBRATION_TYPE_EDGE = 0;
+    public static final int CALIBRATION_TYPE_LINE = 1;
+
+    public int mCalType = CALIBRATION_TYPE_EDGE; //line tracking: (0: edge tracking; 1: line tracking)
     public int mStartWork = 0;
-    public int mROIx = 260;
-    public int mROIx_s = 260;
+    public int mROIx = 120;
+    public int mROIx_s = 120;
     public int mROIy = 85;
     public int mROIw = 120;
     public int mROIh = 30;
     public int mStartAlgDetect = 0;
 
+    public int mLeftMean = 0;
+    public int mRightMean = 0;
+    public int mRLeftMean = 0;
+    public int mRRightMean = 0;
+    public int mIsCalibrated = 0;
+    public int mMeanDiff = 0;
+    public int mMeanDelta = 0;
+    public int mRMeanDiff = 0;
+    public int mRMeanDelta = 0;
+    public int mRightLeftMeanDiff = 0;
+
 
     //============================== Calibration view start ==============================
-    //´æ´¢µÄ¿òµÄÎ»ÖÃ ¹æÔò£º×Ö¶ÎÓÃ','Á¬½Ó  0.left 1.top 2.width 3.height
+    //å­˜å‚¨çš„æ¡†çš„ä½ç½® è§„åˆ™ï¼šå­—æ®µç”¨','è¿æ¥  0.left 1.top 2.width 3.height
     String MARK_POINT = "mark_point";
+    String CAL_VALUE = "cal_value";
     private int rootWidth = 640;
-    private int rootHeight = 480;
+    private int rootHeight = 200;
 
 
     private float viewWidth;
@@ -88,32 +103,32 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     private float aspectRatio;
     private int borderColor;
     private int lineColor;
-    //ÊÇ·ñ»æÖÆÖĞ¼äµÄ·Ö¸îÏß
+    //æ˜¯å¦ç»˜åˆ¶ä¸­é—´çš„åˆ†å‰²çº¿
     private static final boolean isShowLine = true;
 
-    //Ñ¡Ôñ¿ò ×î´óºÍ×îĞ¡»æÖÆÏŞÖÆ
+    //é€‰æ‹©æ¡† æœ€å¤§å’Œæœ€å°ç»˜åˆ¶é™åˆ¶
     private float minWidth = 120;
     private float minHeight = 30;
-    private float maxWidth = 240;
-    private float maxHeight = 60;
+    private float maxWidth = 160;
+    private float maxHeight = 40;
 
 
-    //Ä¬ÈÏ¿òµÄ¿í¶È ºÍ ³¤¿í±ÈÀı
+    //é»˜è®¤æ¡†çš„å®½åº¦ å’Œ é•¿å®½æ¯”ä¾‹
     private static final float DEFAULT_VIEW_WIDTH = 120;
     private static final float DEFAULT_ASPECT_RATIO = 4;
-    //Ä¬ÈÏ¿òµÄ»æÖÆÎ»ÖÃ
+    //é»˜è®¤æ¡†çš„ç»˜åˆ¶ä½ç½®
     private static final float DEFAULT_VIEW_LEFT = 260;
     private static final float DEFAULT_VIEW_RIGHT = 380;
     private static final float DEFAULT_VIEW_TOP = 85;
     private static final float DEFAULT_VIEW_BOTTOM = 115;
-    //Ä¬ÈÏ¿òµÄÑÕÉ«
+    //é»˜è®¤æ¡†çš„é¢œè‰²
     private static final int DEFAULT_BORDER_COLOR = Color.RED;
-    //Ä¬ÈÏ¿òÖĞÏßµÄÑÕÉ«
+    //é»˜è®¤æ¡†ä¸­çº¿çš„é¢œè‰²
     private static final int DEFAULT_Line_COLOR = Color.GREEN;
     protected Paint paint = new Paint();
 
-    //ÊÇ·ñÊÇÊÖ¶¯ÉèÖÃ/µÚÒ»´ÎÉèÖÃ
-    private int setRoiType = 1;
+    //æ˜¯å¦æ˜¯æ‰‹åŠ¨è®¾ç½®/ç¬¬ä¸€æ¬¡è®¾ç½®
+    private int setRoiType = 0;
 
     private boolean isTouch;
 
@@ -129,29 +144,89 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             String[] cacheParamArr = cacheParam.split(",");
             viewWidth = Float.parseFloat(cacheParamArr[2]);
             viewHeight = Float.parseFloat(cacheParamArr[3]);
-            Log.d(TAG, "initCalibrationView: ÓĞ»º´æ viewWidth = " + viewWidth + ",viewHeight = " + viewHeight);
+            Log.d(TAG, "initCalibrationView: æœ‰ç¼“å­˜ viewWidth = " + viewWidth + ",viewHeight = " + viewHeight);
 
             rect.left = Float.parseFloat(cacheParamArr[0]);
             rect.top = Float.parseFloat(cacheParamArr[1]);
             rect.right = rect.left + viewWidth;
             rect.bottom = rect.top + viewHeight;
-            Log.d(TAG, "initCalibrationView: ÓĞ»º´æ ¿òµÄÎ»ÖÃ£ºleft = " + rect.left + ",top = " + rect.top + ",right = " + viewWidth + ",bottom = " + viewHeight);
+            Log.d(TAG, "initCalibrationView: æœ‰ç¼“å­˜ æ¡†çš„ä½ç½®ï¼šleft = " + rect.left + ",top = " + rect.top + ",right = " + viewWidth + ",bottom = " + viewHeight);
         } else {
             viewWidth = DEFAULT_VIEW_WIDTH;
             viewHeight = viewWidth / aspectRatio;
-            Log.d(TAG, "initCalibrationView: ÎŞ»º´æ viewWidth=" + viewWidth + ",viewHeight=" + viewHeight);
+            Log.d(TAG, "initCalibrationView: æ— ç¼“å­˜ viewWidth=" + viewWidth + ",viewHeight=" + viewHeight);
 
             rect.left = rootWidth / 2 - viewWidth / 2;
             rect.top = DEFAULT_VIEW_TOP;//getMeasuredHeight() / 2 - viewHeight / 2;
             rect.right = rect.left + viewWidth;
             rect.bottom = rect.top + viewHeight;
-            Log.d(TAG, "initCalibrationView: ÎŞ»º´æ ¿òµÄÎ»ÖÃ£ºleft = " + rect.left + ",top = " + rect.top + ",right = " + viewWidth + ",bottom = " + viewHeight);
+            Log.d(TAG, "initCalibrationView: æ— ç¼“å­˜ æ¡†çš„ä½ç½®ï¼šleft = " + rect.left + ",top = " + rect.top + ",right = " + viewWidth + ",bottom = " + viewHeight);
         }
+
+        String cacheParam1 = SpHelper.getInstance().getString(CAL_VALUE, "");
+        if (cacheParam1 != null && !cacheParam1.equals("")) {
+            String[] cacheParamArr = cacheParam1.split(",");
+            mLeftMean = Integer.parseInt(cacheParamArr[1]);
+            mRightMean = Integer.parseInt(cacheParamArr[2]);
+            mRLeftMean = Integer.parseInt(cacheParamArr[3]);
+            mRRightMean = Integer.parseInt(cacheParamArr[4]);
+            mRightLeftMeanDiff = Integer.parseInt(cacheParamArr[5]);
+
+            mIsCalibrated = Integer.parseInt(cacheParamArr[0]);
+            Log.d(TAG, "initCalibrationValue: mLeftMean = " + mLeftMean + ",mRightMean = " + mRightMean +
+                    "mIsCalibrated=" + mIsCalibrated);
+            if (mLeftMean >= mRightMean) {
+                mMeanDiff = 0;
+                mMeanDelta = mLeftMean - mRightMean;
+            } else {
+                mMeanDiff = 1;
+                mMeanDelta = mRightMean - mLeftMean;
+            }
+
+            if (mRLeftMean >= mRRightMean) {
+                mRMeanDiff = 0;
+                mRMeanDelta = mRLeftMean - mRRightMean;
+            } else {
+                mRMeanDiff = 1;
+                mRMeanDelta = mRRightMean - mRLeftMean;
+            }
+        }
+    }
+
+    public void saveCalValue(int lmean, int rlmean, int rmean, int rrmean, int lrdiff) {
+        mLeftMean = lmean;
+        mRightMean = rmean;
+        mRLeftMean = rlmean;
+        mRRightMean = rrmean;
+        mIsCalibrated = 1;
+
+        if (mLeftMean >= mRightMean) {
+            mMeanDiff = 0;
+            mMeanDelta = mLeftMean - mRightMean;
+        } else {
+            mMeanDiff = 1;
+            mMeanDelta = mRightMean - mLeftMean;
+        }
+
+        if (mRLeftMean > mRRightMean) {
+            mRMeanDiff = 0;
+            mRMeanDelta = mRLeftMean - mRRightMean;
+        } else {
+            mRMeanDiff = 1;
+            mRMeanDelta = mRRightMean - mRLeftMean;
+        }
+        mRightLeftMeanDiff = lrdiff;
+
+        String markPoint = mIsCalibrated + "," + mLeftMean + "," + mRightMean + ","
+                + mRLeftMean + "," + mRRightMean + "," + mRightLeftMeanDiff;
+        SpHelper.getInstance().putString(CAL_VALUE, markPoint);
+        Log.d(TAG, "saveCalValue: mLeftMean = " + mLeftMean + ",mRightMean = " + mRightMean +
+                ",mIsCalibrated = " + mIsCalibrated);
     }
 
 
     protected void onDrawCheckBox(Canvas canvas) {
-        //TODO ±È½Ïlast»æÖÆµÄÎ»ÖÃ left top width height ÈçºÎÒ»Ñù Ôò²»»æÖÆ ·ñÔò»æÖÆ È»ºó¸üĞÂlast²ÎÊı
+        //TODO æ¯”è¾ƒlastç»˜åˆ¶çš„ä½ç½® left top width height å¦‚ä½•ä¸€æ · åˆ™ä¸ç»˜åˆ¶ å¦åˆ™ç»˜åˆ¶ ç„¶åæ›´æ–°lastå‚æ•°
         paint.setColor(borderColor);
         paint.setStrokeWidth(4.0f);
         paint.setStyle(Paint.Style.STROKE);
@@ -187,38 +262,42 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             if (event.getPointerCount() == 2) {
                 float x = event.getX(0) - event.getX(1);
                 float y = event.getY(0) - event.getY(1);
-                float value = (float) Math.sqrt(x * x + y * y);// ¼ÆËãÁ½µãµÄ¾àÀë
+                float value = (float) Math.sqrt(x * x + y * y);// è®¡ç®—ä¸¤ç‚¹çš„è·ç¦»
                 if (baseValue == 0) {
                     baseValue = value;
                 } else {
                     if (value - baseValue >= 10 || value - baseValue <= -10) {
-                        float scale = value / baseValue;// µ±Ç°Á½µã¼äµÄ¾àÀë³ıÒÔÊÖÖ¸ÂäÏÂÊ±Á½µã¼äµÄ¾àÀë¾ÍÊÇĞèÒªËõ·ÅµÄ±ÈÀı¡£
+                        float scale = value / baseValue;// å½“å‰ä¸¤ç‚¹é—´çš„è·ç¦»é™¤ä»¥æ‰‹æŒ‡è½ä¸‹æ—¶ä¸¤ç‚¹é—´çš„è·ç¦»å°±æ˜¯éœ€è¦ç¼©æ”¾çš„æ¯”ä¾‹ã€‚
                         setRoiType = 1;
+                        //Log.d(TAG, "setROItype is 1");
                         scaleRect(scale);
                         scaleTime = System.currentTimeMillis();
                     }
                 }
-                //bug  Á½Ö¸Ëõ·ÅÌ§Æğºó »áµ¼ÖÂÒ»´Î »¬¶¯¡£ ÀûÓÃÊ±¼ä¼ä¸ô×öµÄÅĞ¶Ï
-            } else if (event.getPointerCount() == 1 && System.currentTimeMillis() - scaleTime > 500) {
+                //bug  ä¸¤æŒ‡ç¼©æ”¾æŠ¬èµ·å ä¼šå¯¼è‡´ä¸€æ¬¡ æ»‘åŠ¨ã€‚ åˆ©ç”¨æ—¶é—´é—´éš”åšçš„åˆ¤æ–­
+            } else if (event.getPointerCount() == 1 && System.currentTimeMillis() - scaleTime > 300) {
                 float x = event.getRawX();
                 float y = event.getRawY();
                 x -= last_x;
                 y -= last_y;
                 if (x >= 10 || y >= 10 || x <= -10 || y <= -10) {
                     setRoiType = 1;
+                    //Log.d(TAG, "setROItype is 1");
                     center(x, y);
                 }
                 last_x = event.getRawX();
                 last_y = event.getRawY();
             }
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            //setRoiType = 1;
+            //center(0, 0);
         }
         return true;
     }
 
 
     /**
-     * Ëõ·Åºó ¸üĞÂ¿ò ÇÒÒÆ¶¯0,0
+     * ç¼©æ”¾å æ›´æ–°æ¡† ä¸”ç§»åŠ¨0,0
      *
      * @param scale
      */
@@ -247,7 +326,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     /**
-     * ´¥ÃşµãÎªÖĞĞÄ->>ÒÆ¶¯
+     * è§¦æ‘¸ç‚¹ä¸ºä¸­å¿ƒ->>ç§»åŠ¨
      *
      * @param dx
      * @param dy
@@ -274,16 +353,16 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             rect.top = rect.bottom - viewHeight;
         }
         String markPoint = rect.left + "," + rect.top + "," + viewWidth + "," + viewHeight;
-        Log.d(TAG, "center: ´æ´¢ÍÏ¶¯¹ıµÄ Öµ£º" + markPoint);
+        Log.d(TAG, "center: å­˜å‚¨æ‹–åŠ¨è¿‡çš„ å€¼ï¼š" + markPoint);
         SpHelper.getInstance().putString(MARK_POINT, markPoint);
     }
 
 
     /**
-     * Æ½ÒÆ
+     * å¹³ç§»
      */
     public void translationBox(int devi) {
-        //´æ´¢¹æÔò "left,top,width,height"
+        //å­˜å‚¨è§„åˆ™ "left,top,width,height"
         String cacheParam = SpHelper.getInstance().getString(MARK_POINT, "");
 
 
@@ -320,7 +399,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     /**
-     * ÉèÖÃÊÇ·ñ cal ¿ÉÒÔ»¬¶¯  »ò Ëõ·Å
+     * è®¾ç½®æ˜¯å¦ cal å¯ä»¥æ»‘åŠ¨  æˆ– ç¼©æ”¾
      * @param isTouch
      */
     public void setIsTouch(boolean isTouch) {
@@ -360,6 +439,14 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
     public void setCalibrationType(int type) {
         mCalType = type;
+    }
+
+    public void setCalStatus(int status) {
+        if (status == 1) {
+            mStartAlgDetect = 1;
+        } else {
+            mStartAlgDetect = 0;
+        }
     }
 
     public void setROI(int x, int y, int width, int height, int type) {
