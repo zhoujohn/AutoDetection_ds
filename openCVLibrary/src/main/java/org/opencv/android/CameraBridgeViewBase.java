@@ -442,6 +442,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     }
 
     public void setCalStatus(int status) {
+        //Log.d(TAG, "set calstatus is:" + status);
         if (status == 1) {
             mStartAlgDetect = 1;
         } else {

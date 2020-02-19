@@ -60,7 +60,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     private static final int MEAN_LEFT_SHIFT = 20;
     private static final int MEAN_RIGHT_SHIFT = 10;
     private static final int MEAN_LEFT_RIGHT_DIFF_SHIFT = 10;
-    private static final int MEAN_HEIGHT = 6;
+    private static final int MEAN_HEIGHT = 10;
     private static final int MEAN_WIDTH = 10;
     private static final int MEAN_ROI_WIDTH = MEAN_LEFT_SHIFT;
     private static final int MEAN_DELTA_DRIFT = 20;
@@ -436,7 +436,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCalRightMean2 = v[2];
                     mRCalLeftMean2 = v[3];
                     mRCalRightMean2 = v[4];
-                    if (Math.abs(mCalValid2-mCalValid1) < 2) {
+                    if ((mCalValid2 != DEVI_FILTER_INVALID_VALUE)
+                        && (Math.abs(mCalValid2-mCalValid1) < 2)) {
                         mCalIndex = 2;
                     } else {
                         mCalIndex = 0;
@@ -450,7 +451,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCalRightMean3 = v[2];
                     mRCalLeftMean3 = v[3];
                     mRCalRightMean3 = v[4];
-                    if ((Math.abs(mCalValid3-mCalValid1) < 2)
+                    if ((mCalValid3 != DEVI_FILTER_INVALID_VALUE)
+                            && (Math.abs(mCalValid3-mCalValid1) < 2)
                             && (Math.abs(mCalValid3-mCalValid2) < 2)) {
                         mStartAlgDetect = 0;
                         mCalIndex = 0;
@@ -484,6 +486,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCalValid1 = v[0];
                     mCalLeftMean1 = v[1];
                     mCalRightMean1 = v[2];
+                    Log.d(TAG, "PRESET CAL1 status 0:" + mCalValid1 + "lm is:" + mCalLeftMean1 + "rm is:" + mCalRightMean1);
                     if (mCalValid1 != DEVI_FILTER_INVALID_VALUE) {
                         mCalIndex = 1;
                     }
@@ -494,7 +497,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCalValid2 = v[0];
                     mCalLeftMean2 = v[1];
                     mCalRightMean2 = v[2];
-                    if (Math.abs(mCalValid2-mCalValid1) < 2) {
+                    Log.d(TAG, "PRESET CAL1 status 1 is:" + mCalValid2 + "lm is:" + mCalLeftMean2 + "rm is:" + mCalRightMean2);
+                    if ((mCalValid2 != DEVI_FILTER_INVALID_VALUE)
+                            && (Math.abs(mCalValid2-mCalValid1) < 2)) {
                         mCalIndex = 2;
                     } else {
                         mCalIndex = 0;
@@ -506,7 +511,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     mCalValid3 = v[0];
                     mCalLeftMean3 = v[1];
                     mCalRightMean3 = v[2];
-                    if ((Math.abs(mCalValid3-mCalValid1) < 2)
+                    Log.d(TAG, "PRESET CAL1 status 2 is:" + mCalValid3 + "lm is:" + mCalLeftMean3 + "rm is:" + mCalRightMean3);
+                    if ((mCalValid3 != DEVI_FILTER_INVALID_VALUE)
+                            && (Math.abs(mCalValid3-mCalValid1) < 2)
                             && (Math.abs(mCalValid3-mCalValid2) < 2)) {
                         mStartAlgDetect = 0;
                         mCalIndex = 0;
@@ -515,12 +522,14 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                         int mean_r = (mCalRightMean1+mCalRightMean2+mCalRightMean3)/3;
                         saveCalValue(mean_l, 0, mean_r, 0, 0);
                         int mean = (mCalValid1+mCalValid2+mCalValid3)/3;
+                        Log.d(TAG, "PRESET CAL1 status 2 sub 1");
                         return mean;
                     } else {
                         mCalValid1 = mCalValid3;
                         mCalLeftMean1 = v[1];
                         mCalRightMean1 = v[2];
                         mCalIndex = 1;
+                        Log.d(TAG, "PRESET CAL1 status 2 sub 2");
                         return DEVI_FILTER_INVALID_VALUE;
                     }
                 }
@@ -635,6 +644,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         means[1] = (int)l_mean.get(0,0)[0];
         means[2] = (int)l_stddev.get(0,0)[0];
 
+        //Log.d(TAG, "getmeans valid left:" + (int)l_mean.get(1,0)[0] + "left mean:" + (int)l_mean.get(0,1)[0]);
+
         // get mean value of right area
         Rect rect1 = new Rect(line+MEAN_RIGHT_SHIFT, 0, MEAN_WIDTH, MEAN_HEIGHT);
         Mat roi1 = new Mat(frame, rect1);
@@ -642,14 +653,16 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
         MatOfDouble r_mean = new MatOfDouble();
         MatOfDouble r_stddev = new MatOfDouble();
-        Core.meanStdDev(gray, r_mean, r_stddev);
+        Core.meanStdDev(gray1, r_mean, r_stddev);
         means[3] = (int)r_mean.get(0,0)[0];
         means[4] = (int)r_stddev.get(0,0)[0];
+
+        //Log.d(TAG, "getmeans valid right:" + (int)r_mean.get(1,1)[0] + "left mean:" + (int)r_mean.get(2,2)[0]);
 
         isvalid = 1;
 
         means[0] = isvalid;
-        Log.d(TAG, "getmeans valid:" + means[0] + "left mean:" + means[1] + "right stddev:" + means[2]);
+        Log.d(TAG, "getmeans valid:" + means[0] + "left mean:" + means[1] + "right mean:" + means[3]);
 
         l_mean.release();
         l_stddev.release();
@@ -764,6 +777,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
             return value_array;
         }
 
+        Log.d(TAG, "PRESET CAL1 ENTER");
+
         //roiwidth = alignRoi(mROIx_s, mROIw);
 
         Rect rect = new Rect(mROIx_s, mROIy, mROIw, DETECTION_AREA_HEIGHT);
@@ -782,6 +797,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         // 2. second step: choose the most suitable one of the detected lines
         int validLine = 0;
         for (int i = 0; i < mMaxLines; i++) {
+            //Log.d(TAG, "preset CAL lines original:" + mLines[i]);
             if ((mLines[i] != 0) &&
                     (Math.abs(mLines[i] - mROIw/2) < Math.abs(validLine - mROIw/2)))  {
                 // always choose the center-most one
@@ -789,8 +805,10 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
             }
         }
 
+        Log.d(TAG, "preset CAL lines at:" + validLine);
+
         // 3. third step: get mean value of two sides of detected line
-        int res[] = getMeans(thresholdImg, validLine);
+        int res[] = getMeans(gray, validLine);
         int isvalid = res[0];
         if (isvalid != 0) {
             //saveCalValue(res[1], res[2], res[3], res[4]);
@@ -877,8 +895,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         }
 
         // 3. third step: get mean value of two sides of detected line
-        int res_l[] = getMeans(thresholdImg, validLine_l);
-        int res_r[] = getMeans(thresholdImg, validLine_r);
+        int res_l[] = getMeans(gray, validLine_l);
+        int res_r[] = getMeans(gray, validLine_r);
         int isvalid_l = res_l[0];
         int isvalid_r = res_r[0];
         if ((isvalid_l != 0) && (isvalid_r != 0)) {
@@ -929,6 +947,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
             return devi;
         }
 
+        Log.d(TAG, "caldeviation_adap1 enter.");
 
         if (mExpandDetectArea == 1) {
             roiwidth = alignRoi(roistart, mROIw);
@@ -948,22 +967,26 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         //detectLines(thresholdImg);
         int validLine = 0;
         for (int i = 0; i < mMaxLines; i++) {
+            Log.d(TAG, "caldeviation_adap1 enter getmeans");
             if (mLines[i] != 0) {
                 //validLine = mLines[i];
-                int mean[] = getMeans(thresholdImg, mLines[i]);
+                Log.d(TAG, "caldeviation_adap1 enter getmeans 1");
+                int mean[] = getMeans(gray, mLines[i]);
                 if (mean[0] != 0) {
                     int diff;
-                    if (mean[1] > mean[2]) {
+                    if (mean[1] > mean[3]) {
                         diff = 0;
                     } else {
                         diff = 1;
                     }
 
                     if (mIsCalibrated != 0) {
+                        Log.d(TAG, "caldeviation_adap1 enter calibrated");
                         if ((Math.abs(mean[1] - mLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
-                                (Math.abs(mean[2] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[3] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
                                 (diff == mMeanDiff) &&
-                                (Math.abs(Math.abs(mean[1] - mean[2]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
+                                (Math.abs(Math.abs(mean[1] - mean[3]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
+                            Log.d(TAG, "caldeviation_adap1 enter getvalidline");
                             //get valid line
                             validLine = mLines[i];
                             break;
@@ -972,7 +995,8 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                         // not calibrated, always choose the first one
                         //validLine = mLines[i];
                         // not calibrated, return invalid value
-                        validLine = 1000;
+                        Log.d(TAG, "caldeviation_adap1 enter on calibration");
+                        validLine = 0;
                         break;
                     }
                 }
@@ -1002,15 +1026,17 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         // change devi to fit camera frame position
         int rel_devi = 0;
         if (validLine != 0) {
-            rel_devi = roistart + devi; // add shift value, get abstract value of shift, regarding to original frame point
+            rel_devi = roistart + validLine; // add shift value, get abstract value of shift, regarding to original frame point
             devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
 
             // update roi position, only update mROIx since it is the only variety of the four variables
-            mROIx_s = devi-mROIw/2;
-            if (mROIx_s < 0) {
-                mROIx_s = 0;
-            } else if (mROIx_s > (mOriginWidth - mROIw)) {
-                mROIx_s = mOriginWidth - mROIw;
+            if (mStartAlgDetect == 0) {
+                mROIx_s = devi - mROIw / 2;
+                if (mROIx_s < 0) {
+                    mROIx_s = 0;
+                } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                    mROIx_s = mOriginWidth - mROIw;
+                }
             }
             //Log.d(TAG, "mROI value is:" + mROIx_s + mROIx + mROIw + "devi is:" + devi);
         }
@@ -1034,7 +1060,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                 int mean[] = getMeans(frame, mLines[i]);
                 if (mean[0] != 0) {
                     int diff;
-                    if (mean[1] > mean[2]) {
+                    if (mean[1] > mean[3]) {
                         diff = 0;
                     } else {
                         diff = 1;
@@ -1042,9 +1068,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     if (mIsCalibrated != 0) {
                         if ((Math.abs(mean[1] - mRLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
-                                (Math.abs(mean[2] - mRRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[3] - mRRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
                                 (diff == mRMeanDiff) &&
-                                (Math.abs(Math.abs(mean[1] - mean[2]) - mRMeanDelta) < MEAN_DELTA_DRIFT)) {
+                                (Math.abs(Math.abs(mean[1] - mean[3]) - mRMeanDelta) < MEAN_DELTA_DRIFT)) {
                             // check if left right difference is suitable
                             int delta = mLines[i] - left;
                             if (Math.abs(delta - mRightLeftMeanDiff) < MEAN_LEFT_RIGHT_DIFF_SHIFT) {
@@ -1100,10 +1126,10 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         for (int i = 0; i < mMaxLines; i++) {
             if (mLines[i] != 0) {
                 //validLine = mLines[i];
-                int mean[] = getMeans(thresholdImg, mLines[i]);
+                int mean[] = getMeans(gray, mLines[i]);
                 if (mean[0] != 0) {
                     int diff;
-                    if (mean[1] > mean[2]) {
+                    if (mean[1] > mean[3]) {
                         diff = 0;
                     } else {
                         diff = 1;
@@ -1111,12 +1137,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     if (mIsCalibrated != 0) {
                         if ((Math.abs(mean[1] - mLeftMean) < MEAN_LEFT_RIGHT_DRIFT) &&
-                                (Math.abs(mean[2] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
+                                (Math.abs(mean[3] - mRightMean) < MEAN_LEFT_RIGHT_DRIFT) &&
                                 (diff == mMeanDiff) &&
-                                (Math.abs(Math.abs(mean[1] - mean[2]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
+                                (Math.abs(Math.abs(mean[1] - mean[3]) - mMeanDelta) < MEAN_DELTA_DRIFT)) {
                             //get valid left line
                             validLine_l = mLines[i];
-                            validLine_r = getRightLine(validLine_l, thresholdImg);
+                            validLine_r = getRightLine(validLine_l, gray);
                             if (validLine_r != 0) {
                                 validLine = (validLine_l + validLine_r)/2;
                                 break;
@@ -1126,7 +1152,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                         // not calibrated, always choose the first one
                         // validLine = mLines[i];
                         // not calibrated, return invalid value
-                        validLine = 1000;
+                        validLine = 0;
                         break;
                     }
                 }
@@ -1156,15 +1182,17 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         // change devi to fit camera frame position
         int rel_devi = 0;
         if (validLine != 0) {
-            rel_devi = roistart + devi; // add shift value, get abstract value of shift, regarding to original frame point
+            rel_devi = roistart + validLine; // add shift value, get abstract value of shift, regarding to original frame point
             devi = rel_devi;// - mROIx - mROIw/2; // get relative shift to center of value
 
             // update roi position, only update mROIx since it is the only variety of the four variables
-            mROIx_s = devi-mROIw/2;
-            if (mROIx_s < 0) {
-                mROIx_s = 0;
-            } else if (mROIx_s > (mOriginWidth - mROIw)) {
-                mROIx_s = mOriginWidth - mROIw;
+            if (mStartAlgDetect == 0) {
+                mROIx_s = devi - mROIw / 2;
+                if (mROIx_s < 0) {
+                    mROIx_s = 0;
+                } else if (mROIx_s > (mOriginWidth - mROIw)) {
+                    mROIx_s = mOriginWidth - mROIw;
+                }
             }
             //Log.d(TAG, "mROI value is:" + mROIx_s + mROIx + mROIw + "devi is:" + devi);
         }

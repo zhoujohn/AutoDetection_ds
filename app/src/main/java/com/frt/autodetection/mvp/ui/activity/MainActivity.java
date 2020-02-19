@@ -408,6 +408,7 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
             mBinding.vLayoutBottom.setVisibility(View.VISIBLE);
             mBinding.vBtnCal.setText("CAL");
             isShowCalLayout = false;
+            _cameraBridgeViewBase.setCalStatus(0);
         }
     }
 
@@ -419,13 +420,15 @@ public class MainActivity extends BaseConfigActivity<MainActivityPresenter, Acti
         //mBinding.vCalibrationView.setIsTouch(isShowCalLayout);
         _cameraBridgeViewBase.setIsTouch(isShowCalLayout);
         mBinding.vBtnCal.setText(isShowCalLayout ? "ⓧ" : "CAL");
+        if (isShowCalLayout) {
+            _cameraBridgeViewBase.setCalStatus(1);
+        } else {
+            _cameraBridgeViewBase.setCalStatus(0);
+        }
         if (isShowSetLayout) {
             mBinding.vLayoutSet.setVisibility(View.GONE);
             mBinding.vBtnSet.setText("SET");
             isShowSetLayout = false;
-            _cameraBridgeViewBase.setCalStatus(1);
-        } else {
-            _cameraBridgeViewBase.setCalStatus(0);
         }
     }
 
